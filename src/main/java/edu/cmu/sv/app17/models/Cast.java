@@ -5,13 +5,17 @@ public class Cast {
     String showId;
     String castName;
     String roles;
+    String castPhoto;
 
-    public Cast(String castName, String showId, String roles, String castPhoto, String castNews) {
+    public Cast(String showId, String castName, String roles, String castPhoto) {
         this.showId = showId;
         this.castName = castName;
         this.roles = roles;
+        this.castPhoto = castPhoto;
     }
+
     public void setId(String id) {
         this.castId = id;
     }
 }
+
