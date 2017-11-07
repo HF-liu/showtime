@@ -39,25 +39,11 @@ function addUser() {
     d = [{
         "userName": "David",
         "email": "david.liu2017@sv.cmu.edu",
-        "phone": "6508501498",
-        "profilePhoto": "345.34.23.6/uyy/xx/avatar.jpg",
-        "favs": "Modern Family, Boston Legal",
-        "showNum": 2,
-        "reviews": "1243456id, 7654321id",
-        "friends": "davidid",
-        "joinDate": "10/10/2017",
         "password": "2doHGUrLJCW6FiYS1JLDLA=="
     },
         {
             "userName": "Hubert",
             "email": "hubert.jia@sv.cmu.edu",
-            "phone": "6509997777",
-            "profilePhoto": "345.34.23.6/df23/x65/avatar.jpg",
-            "favs": "Empire, Vinyl, Scream Queens",
-            "showNum": 3,
-            "reviews": "blablablaid, bla2bla2bla2id, rightrightrightid",
-            "friends": "hubertid",
-            "joinDate": "10/09/2017",
             "password": "qk822KwB1+RlmgJA5NPulg=="
         }];
     var users = dbConnection.collection('users');
@@ -79,7 +65,7 @@ function addUser() {
     })
 }
 
-showList = ['s1','s2','s3','s4','s5'];
+showList = ['s1','s2'];
 channelList = ['c1','c2'];
 introList = ['Long long ago','Long ago','Not too long ago','Last year','Last month','Last week','Yesterday','Several hours ago','Just now'];
 categoryList = ['Awful','Disgusting','Too bad','Worst', 'Not recommend', 'Waste of time','Not too bad', 'Just fine', 'Could be better', 'So cool', 'Hilarious','Amazing','Best ever', 'Watched it twice'];
@@ -111,9 +97,9 @@ function addShow() {
 
     }
 
-    c.forEach(function(review){
+    c.forEach(function(show){
         var cars = dbConnection.collection('shows');
-        cars.insertOne(review);
+        cars.insertOne(show);
     })
 
 }
@@ -123,32 +109,132 @@ function addReview(){
     var shows = dbConnection.collection('shows');
     var reviews = dbConnection.collection('reviews');
 
-    var query1 = { userName: "David" };
-    var query2 = { userName: "Hubert" };
+    var query1 = { userName: 'David' };
+    var query2 = { showName: 's1' };
+    var query3 = { userName: 'Hubert' };
+    var query4 = { showName: 's1' };
 
-    var userid1 = db.collection("users").find(query1, {})._id;
-    var userid2 = db.collection("users").find(query2, {})._id;
+    var userid2;
+    var userid1;
+
+    var result;
+
+    users.find(query1).toArray(function(err, result) {
+        if (err) throw err;
+        shows.find(query2).toArray(function(error, res) {
+            addtest(result[0]._id,res[0]._id);
+        });
+    });
+
+    users.find(query3).toArray(function(err, result) {
+        if (err) throw err;
+        shows.find(query4).toArray(function(error, res) {
+            addtest2(result[0]._id,res[0]._id);
+        });
+    });
+
+
+
+// _id    console.log("test");
+//     console.log(userid1);
+//     console.log(userid2);
+//
+    var date = new Date();
+    date.setFullYear(2020, 0, 14);
+
+
+
+}
+
+function addtest(ID1,ID2) {
+    console.log(ID1);
+    console.log(ID2);
+
+    var users = dbConnection.collection('users');
+    var shows = dbConnection.collection('shows');
+    var reviews = dbConnection.collection('reviews');
 
     var date = new Date();
     date.setFullYear(2020, 0, 14);
 
     d = [{
-        "userId": userid1,
-        "showId": userid1,
+        "userId": ID1.toString(),
+        "showId": ID2.toString(),
         "createDate": date,
-        "reviewTopic": "345.34.23.6/uyy/xx/avatar.jpg",
+        "reviewTopic": "345.34.23.6/uyy/xx/avatarb.jpg",
         "reviewContent": "Modern Family, Boston Legal"
     },
         {
-            "userId": userid2,
-            "showId": userid2,
+            "userId": ID1.toString(),
+            "showId": ID2.toString(),
             "createDate": date,
-            "reviewTopic": "345.34.23.6/uyy/xx/avatar.jpg",
+            "reviewTopic": "345.34.23.6/uyy/xx/avatara.jpg",
             "reviewContent": "Modern Family, Boston Legal"
         }];
 
+    reviews.insertOne(d[0], function(err,doc){
+        if (err){
+            console.log("Could not add review 1");
+        }
+        // else {
+        //     addReviewstoUser(doc.ops[0]._id.toString(),100);
+        // }
+    })
+    reviews.insertOne(d[1], function(err,doc){
+        if (err){
+            console.log("Could not add review 2");
+        }
+        // else {
+        //     addReviewstoUser(doc.ops[0]._id.toString(),100);
+        // }
+    })
+
 }
 
+function addtest2(ID1,ID2) {
+    console.log(ID1);
+    console.log(ID2);
+
+    var users = dbConnection.collection('users');
+    var shows = dbConnection.collection('shows');
+    var reviews = dbConnection.collection('reviews');
+
+    var date = new Date();
+    date.setFullYear(2020, 0, 14);
+
+    d = [{
+        "userId": ID1.toString(),
+        "showId": ID2.toString(),
+        "createDate": date,
+        "reviewTopic": "345.34.23.6/uyy/xx/avatarb.jpg",
+        "reviewContent": "Modern Family, Boston Legal"
+    },
+        {
+            "userId": ID1.toString(),
+            "showId": ID2.toString(),
+            "createDate": date,
+            "reviewTopic": "345.34.23.6/uyy/xx/avatara.jpg",
+            "reviewContent": "Modern Family, Boston Legal"
+        }];
+
+    reviews.insertOne(d[0], function(err,doc){
+        if (err){
+            console.log("Could not add review 1");
+        }
+        // else {
+        //     addReviewstoUser(doc.ops[0]._id.toString(),100);
+        // }
+    })
+    reviews.insertOne(d[1], function(err,doc){
+        if (err){
+            console.log("Could not add review 2");
+        }
+        // else {
+        //     addReviewstoUser(doc.ops[0]._id.toString(),100);
+        // }
+    })
+
+}
 
 
 setTimeout(closeConnection,5000);
