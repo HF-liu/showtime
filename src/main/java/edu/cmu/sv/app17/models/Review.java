@@ -4,8 +4,8 @@ import java.util.Date;
 
 public class Review {
     String reviewId = null;
-    String showId;
     String userId;
+    String showId;
     Date createDate;
     String reviewTopic;
     String reviewContent;

@@ -30,14 +30,19 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Path("users")
 public class UserInterface {
     private MongoCollection<Document> collection;
     private MongoCollection<Document> reviewCollection;
+    private MongoCollection<Document> favCollection;
+    private MongoCollection<Document> adminCollection;
     private ObjectWriter ow;
 
 
@@ -47,6 +52,8 @@ public class UserInterface {
 
         this.collection = database.getCollection("users");
         this.reviewCollection = database.getCollection("reviews");
+        this.favCollection = database.getCollection("favs");
+        this.adminCollection = database.getCollection("admins");
         ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
     }
@@ -65,13 +72,7 @@ public class UserInterface {
             User user = new User(
                     item.getString("userName"),
                     item.getString("email"),
-                    item.getString("phone"),
-                    item.getString("profilePhoto"),
-                    item.getString("favs"),
-                    item.getInteger("showNum"),
-                    item.getString("reviews"),
-                    item.getString("friends"),
-                    item.getString("joinDate")
+                    item.getString("password")
             );
             user.setId(item.getObjectId("_id").toString());
             userList.add(user);
@@ -93,13 +94,7 @@ public class UserInterface {
             User user = new User(
                     item.getString("userName"),
                     item.getString("email"),
-                    item.getString("phone"),
-                    item.getString("profilePhoto"),
-                    item.getString("favs"),
-                    item.getInteger("showNum"),
-                    item.getString("reviews"),
-                    item.getString("friends"),
-                    item.getString("joinDate")
+                    item.getString("password")
             );
             user.setId(item.getObjectId("_id").toString());
             return new APPResponse(user);
@@ -138,28 +133,17 @@ public class UserInterface {
             sortList.forEach(sortItem -> {
                 sortParams.put(sortItem,1);
             });
-//            long resultCount = reviewCollection.count(sortParams);
 
             FindIterable<Document> results = reviewCollection.find(query).sort(sortParams).skip(offset).limit(count);
 
-
-//            BasicDBObject query = new BasicDBObject();
-//            query.put("userId", id);
-//
-//            long resultCount = reviewCollection.count(query);
-//            FindIterable<Document> results = reviewCollection.find(query).skip(offset).limit(count);
             for (Document item : results) {
                 String showId = item.getString("showId");
                 Review review = new Review(
                         showId,
-                        item.getString("episodeId"),
                         item.getString("userId"),
-                        item.getInteger("rate"),
-                        item.getString("createDate"),
-                        item.getString("editDate"),
+                        item.getDate("createDate"),
                         item.getString("reviewTopic"),
-                        item.getString("reviewContent"),
-                        item.getInteger("likes")
+                        item.getString("reviewContent")
                 );
                 review.setId(item.getObjectId("_id").toString());
                 reviewList.add(review);
@@ -188,31 +172,21 @@ public class UserInterface {
         }
         if (!json.has("showId"))
             throw new APPBadRequestException(55, "missing showId");
-        if (!json.has("episodeId"))
-            throw new APPBadRequestException(55, "missing episodeId");
-        if (!json.has("rate"))
-            throw new APPBadRequestException(55, "missing rate");
         if (!json.has("createDate"))
             throw new APPBadRequestException(55, "missing createDate");
-        if (!json.has("editDate"))
-            throw new APPBadRequestException(55, "missing editDate");
         if (!json.has("reviewTopic"))
             throw new APPBadRequestException(55, "missing reviewTopic");
         if (!json.has("reviewContent"))
             throw new APPBadRequestException(55, "missing reviewContent");
-        if (!json.has("likes"))
-            throw new APPBadRequestException(55, "missing likes");
-        if (json.getInt("likes") < 0) {
-            throw new APPBadRequestException(56, "Invalid likes - cannot be less than 0");
-        }
+
+        String createdt = json.getString("createDate");//"2013-03-26"
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date parsedate = df.parse(createdt);
+
         Document doc = new Document("showId", json.getString("showId"))
-                .append("episodeId", json.getString("episodeId"))
-                .append("rate", json.getInt("rate"))
-                .append("createDate", json.getString("createDate"))
-                .append("editDate", json.getString("editDate"))
+                .append("createDate", parsedate)
                 .append("reviewTopic", json.getString("reviewTopic"))
                 .append("reviewContent", json.getString("reviewContent"))
-                .append("likes", json.getInt("likes"))
                 .append("userId", id);
         reviewCollection.insertOne(doc);
         return new APPResponse();
@@ -232,30 +206,12 @@ public class UserInterface {
             throw new APPBadRequestException(55, "missing userName");
         if (!json.has("email"))
             throw new APPBadRequestException(55, "missing email");
-        if (!json.has("phone"))
-            throw new APPBadRequestException(55, "missing phone");
-        if (!json.has("profilePhoto"))
-            throw new APPBadRequestException(55, "missing profilePhoto");
-        if (!json.has("favs"))
-            throw new APPBadRequestException(55, "missing favs");
-        if (!json.has("showNum"))
-            throw new APPBadRequestException(55, "missing showNum");
-        if (!json.has("reviews"))
-            throw new APPBadRequestException(55, "missing reviews");
-        if (!json.has("friends"))
-            throw new APPBadRequestException(55, "missing friends");
-        if (!json.has("joinDate"))
-            throw new APPBadRequestException(55, "missing joinDate");
+        if (!json.has("password"))
+            throw new APPBadRequestException(55, "missing password");
 
         Document doc = new Document("userName", json.getString("userName"))
                 .append("email", json.getString("email"))
-                .append("phone", json.getString("phone"))
-                .append("profilePhoto", json.getString("profilePhoto"))
-                .append("favs", json.getString("favs"))
-                .append("showNum", json.getInt("showNum"))
-                .append("reviews", json.getString("reviews"))
-                .append("friends", json.getString("friends"))
-                .append("joinDate", json.getString("joinDate"));
+                .append("password", json.getString("password"));
             collection.insertOne(doc);
         return new APPResponse();
     }
@@ -282,20 +238,8 @@ public class UserInterface {
                 doc.append("userName", json.getString("userName"));
             if (json.has("email"))
                 doc.append("email", json.getString("email"));
-            if (json.has("phone"))
-                doc.append("phone", json.getString("phone"));
-            if (json.has("profilePhoto"))
-                doc.append("profilePhoto", json.getString("profilePhoto"));
-            if (json.has("favs"))
-                doc.append("favs", json.getString("favs"));
-            if (json.has("showNum"))
-                doc.append("showNum", json.getInt("showNum"));
-            if (json.has("reviews"))
-                doc.append("reviews", json.getString("reviews"));
-            if (json.has("friends"))
-                doc.append("friends", json.getString("friends"));
-            if (json.has("joinDate"))
-                doc.append("joinDate", json.getString("joinDate"));
+            if (json.has("password"))
+                doc.append("password", json.getString("password"));
             Document set = new Document("$set", doc);
             collection.updateOne(query, set);
 
@@ -306,19 +250,19 @@ public class UserInterface {
         return new APPResponse();
     }
 
-    @DELETE
-    @Path("{id}")
-    @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse delete(@PathParam("id") String id) {
-        BasicDBObject query = new BasicDBObject();
-        query.put("_id", new ObjectId(id));
-
-        DeleteResult deleteResult = collection.deleteOne(query);
-        if (deleteResult.getDeletedCount() < 1)
-            throw new APPNotFoundException(66,"Could not delete");
-
-        return new APPResponse();
-    }
+//    @DELETE
+//    @Path("{id}")
+//    @Produces({ MediaType.APPLICATION_JSON})
+//    public APPResponse delete(@PathParam("id") String id) {
+//        BasicDBObject query = new BasicDBObject();
+//        query.put("_id", new ObjectId(id));
+//
+//        DeleteResult deleteResult = collection.deleteOne(query);
+//        if (deleteResult.getDeletedCount() < 1)
+//            throw new APPNotFoundException(66,"Could not delete");
+//
+//        return new APPResponse();
+//    }
 
     void checkAuthentication(HttpHeaders headers,String id) throws Exception{
         List<String> authHeaders = headers.getRequestHeader(HttpHeaders.AUTHORIZATION);
@@ -330,5 +274,14 @@ public class UserInterface {
             throw new APPUnauthorizedException(71,"Invalid token. Please try getting a new token");
         }
     }
+
+//    void checkAdmin(String id) throws Exception{
+//        BasicDBObject query = new BasicDBObject();
+//        query.put("userId", new ObjectId(id));
+//        Document item = collection.find(query).first();
+//        if (item == null) {
+//            throw new APPNotFoundException(0, "You are not admin.");
+//        }
+//    }
 
 }
