@@ -137,17 +137,21 @@ public class ReviewInterface {
             BasicDBObject query = new BasicDBObject();
             query.put("_id", new ObjectId(id));
 
-            String createdt = json.getString("createDate");
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date parsedate = df.parse(createdt);
+
 
             Document doc = new Document();
             if (json.has("showId"))
                 doc.append("showId",json.getString("showId"));
             if (json.has("userId"))
                 doc.append("userId",json.getString("userId"));
-            if (json.has("createDate"))
+
+            if(json.has("createDate")){
+                String createdt = json.getString("createDate");
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date parsedate = df.parse(createdt);
                 doc.append("createDate",parsedate);
+            }
+
             if (json.has("reviewTopic"))
                 doc.append("reviewTopic",json.getString("reviewTopic"));
             if (json.has("reviewContent"))
@@ -156,7 +160,7 @@ public class ReviewInterface {
             collection.updateOne(query,set);
 
         } catch(JSONException e) {
-            System.out.println("Failed to create a document");
+            System.out.println("Failed to update a document");
 
         }
         return new APPResponse();
