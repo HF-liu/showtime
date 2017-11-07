@@ -8,7 +8,7 @@ public class Show {
      String intro;
      String showCategory;
 
-    public Show(String showName, String channelId, String intro, String showCategory,) {
+    public Show(String showName, String channelId, String intro, String showCategory) {
         this.showName = showName;
         this.channelId = channelId;
         this.intro = intro;
