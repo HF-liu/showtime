@@ -124,7 +124,7 @@ public class UserInterface {
         ArrayList<Review> reviewList = new ArrayList<Review>();
 
         try {
-            checkAuthentication(headers,id);
+            //checkAuthentication(headers,id);
             BasicDBObject query = new BasicDBObject();
             query.put("userId", id);
             long resultCount = reviewCollection.count(query);
