@@ -5,7 +5,7 @@ public class Fav {
     String userId;
     String showId;
 
-    public Fav(String userId, String showId, String favShows, String showPics, String latestWatched, String castNews) {
+    public Fav(String userId, String showId) {
         this.userId = userId;
         this.showId = showId;
     }
