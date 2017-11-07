@@ -98,8 +98,8 @@ function addShow() {
     }
 
     c.forEach(function(show){
-        var cars = dbConnection.collection('shows');
-        cars.insertOne(show);
+        var shows = dbConnection.collection('shows');
+        shows.insertOne(show);
     })
 
 }
@@ -134,13 +134,17 @@ function addReview(){
     });
 
 
+    users.find(query3).toArray(function(err, result) {
+        if (err) throw err;
+        userid1 = result[0]._id;
+
+    });
 
 // _id    console.log("test");
 //     console.log(userid1);
 //     console.log(userid2);
 //
-    var date = new Date();
-    date.setFullYear(2020, 0, 14);
+    var date = new Date(2020,0,14);
 
 
 
@@ -150,8 +154,7 @@ function addtest(ID1,ID2) {
     console.log(ID1);
     console.log(ID2);
 
-    var users = dbConnection.collection('users');
-    var shows = dbConnection.collection('shows');
+    var favs = dbConnection.collection('favs');
     var reviews = dbConnection.collection('reviews');
 
     var date = new Date();
@@ -172,21 +175,35 @@ function addtest(ID1,ID2) {
             "reviewContent": "Modern Family, Boston Legal"
         }];
 
+    e = [{
+        "userId": ID1.toString(),
+        "showId": ID2.toString()
+    },
+        {
+            "userId": ID1.toString(),
+            "showId": ID2.toString()
+        }];
+
     reviews.insertOne(d[0], function(err,doc){
         if (err){
             console.log("Could not add review 1");
         }
-        // else {
-        //     addReviewstoUser(doc.ops[0]._id.toString(),100);
-        // }
     })
     reviews.insertOne(d[1], function(err,doc){
         if (err){
             console.log("Could not add review 2");
         }
-        // else {
-        //     addReviewstoUser(doc.ops[0]._id.toString(),100);
-        // }
+    })
+
+    favs.insertOne(e[0], function(err,doc){
+        if (err){
+            console.log("Could not add fav 1");
+        }
+    })
+    favs.insertOne(e[1], function(err,doc){
+        if (err){
+            console.log("Could not add fav 2");
+        }
     })
 
 }
@@ -195,8 +212,7 @@ function addtest2(ID1,ID2) {
     console.log(ID1);
     console.log(ID2);
 
-    var users = dbConnection.collection('users');
-    var shows = dbConnection.collection('shows');
+    var favs = dbConnection.collection('favs');
     var reviews = dbConnection.collection('reviews');
 
     var date = new Date();
@@ -217,6 +233,17 @@ function addtest2(ID1,ID2) {
             "reviewContent": "Modern Family, Boston Legal"
         }];
 
+
+    e = [{
+        "userId": ID1.toString(),
+        "showId": ID2.toString()
+    },
+        {
+            "userId": ID1.toString(),
+            "showId": ID2.toString()
+        }];
+
+
     reviews.insertOne(d[0], function(err,doc){
         if (err){
             console.log("Could not add review 1");
@@ -232,6 +259,17 @@ function addtest2(ID1,ID2) {
         // else {
         //     addReviewstoUser(doc.ops[0]._id.toString(),100);
         // }
+    })
+
+    favs.insertOne(e[0], function(err,doc){
+        if (err){
+            console.log("Could not add fav 1");
+        }
+    })
+    favs.insertOne(e[1], function(err,doc){
+        if (err){
+            console.log("Could not add fav 2");
+        }
     })
 
 }
