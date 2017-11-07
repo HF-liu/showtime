@@ -66,13 +66,7 @@ public class SessionsInterface {
             User user = new User(
                     item.getString("userName"),
                     item.getString("email"),
-                    item.getString("phone"),
-                    item.getString("profilePhoto"),
-                    item.getString("favs"),
-                    item.getInteger("shownum"),
-                    item.getString("reviews"),
-                    item.getString("friends"),
-                    item.getString("joinDate")
+                    item.getString("phone")
             );
             user.setId(item.getObjectId("_id").toString());
             return new APPResponse(new Session(user));
