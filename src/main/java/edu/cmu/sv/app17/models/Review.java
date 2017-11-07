@@ -6,12 +6,12 @@ public class Review {
     String reviewId = null;
     String userId;
     String showId;
-    Date createDate;
+    String createDate;
     String reviewTopic;
     String reviewContent;
 
     public Review(String showId,String userId,
-                  Date createDate,String reviewTopic, String reviewContent) {
+                  String createDate,String reviewTopic, String reviewContent) {
         this.showId = showId;
         this.userId = userId;
         this.createDate = createDate;

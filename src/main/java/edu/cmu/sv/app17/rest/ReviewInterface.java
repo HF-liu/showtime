@@ -58,13 +58,14 @@ public class ReviewInterface {
         });
 
         try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             FindIterable<Document> results = collection.find().sort(sortParams);
             for (Document item : results) {
                 String showId = item.getString("showId");
                 Review review = new Review(
                         showId,
                         item.getString("userId"),
-                        item.getDate("createDate"),
+                        sdf.format(item.getDate("createDate")),
                         item.getString("reviewTopic"),
                         item.getString("reviewContent")
                 );
@@ -90,6 +91,7 @@ public class ReviewInterface {
         BasicDBObject query = new BasicDBObject();
 
         try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             query.put("_id", new ObjectId(id));
             Document item = collection.find(query).first();
             if (item == null) {
@@ -98,7 +100,7 @@ public class ReviewInterface {
             Review review = new Review(
                     item.getString("showId"),
                     item.getString("userId"),
-                    item.getDate("createDate"),
+                    sdf.format(item.getDate("createDate")),
                     item.getString("reviewTopic"),
                     item.getString("reviewContent")
             );

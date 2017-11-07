@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+@Path("admin")
 public class AdminInterface {
     private MongoCollection<Document> collection;
     private MongoCollection<Document> reviewCollection;
@@ -62,7 +63,7 @@ public class AdminInterface {
 
         ArrayList<Admin> adminList = new ArrayList<Admin>();
 
-        FindIterable<Document> results = collection.find();
+        FindIterable<Document> results = adminCollection.find();
         if (results == null) {
             return new APPResponse(adminList);
         }
@@ -82,8 +83,8 @@ public class AdminInterface {
     public APPResponse getOne(@PathParam("id") String id) {
         BasicDBObject query = new BasicDBObject();
         try {
-            query.put("userId", new ObjectId(id));
-            Document item = collection.find(query).first();
+            query.put("userId", id);
+            Document item = adminCollection.find(query).first();
             if (item == null) {
                 throw new APPNotFoundException(0, "Admin not found.");
             }

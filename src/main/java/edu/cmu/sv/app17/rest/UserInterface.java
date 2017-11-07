@@ -136,13 +136,14 @@ public class UserInterface {
             });
 
             FindIterable<Document> results = reviewCollection.find(query).sort(sortParams).skip(offset).limit(count);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
             for (Document item : results) {
                 String showId = item.getString("showId");
                 Review review = new Review(
                         showId,
                         item.getString("userId"),
-                        item.getDate("createDate"),
+                        sdf.format(item.getDate("createDate")),
                         item.getString("reviewTopic"),
                         item.getString("reviewContent")
                 );
@@ -256,12 +257,12 @@ public class UserInterface {
     @Produces({MediaType.APPLICATION_JSON})
     public APPResponse getFavsForUser(@Context HttpHeaders headers, @PathParam("id") String id) {
 
-        ArrayList<Fav> favList = new ArrayList<Fav>();
+        ArrayList<Fav> favList = new ArrayList<>();
         BasicDBObject query = new BasicDBObject();
 
         try {
-            query.put("userId", new ObjectId(id));
-            FindIterable<Document> results = collection.find(query);
+            query.put("userId", id);
+            FindIterable<Document> results = favCollection.find(query);
             if (results == null) {
                 throw new APPNotFoundException(0, "Favs not found.");
             }
@@ -296,13 +297,11 @@ public class UserInterface {
         } catch (JsonProcessingException e) {
             throw new APPBadRequestException(33, e.getMessage());
         }
-        if (!json.has("userId"))
-            throw new APPBadRequestException(55, "missing userId");
         if (!json.has("showId"))
             throw new APPBadRequestException(55, "missing showId");
 
         Document doc = new Document("showId", json.getString("showId"))
-                .append("userId", json.getString("userId"));
+                .append("userId", id);
         favCollection.insertOne(doc);
         return new APPResponse();
     }

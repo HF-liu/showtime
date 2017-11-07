@@ -51,6 +51,7 @@ function addUser() {
         if (err){
             console.log("Could not add user 1");
         }
+        addAdmin(doc.ops[0]._id.toString());
         // else {
         //     addReviewstoUser(doc.ops[0]._id.toString(),100);
         // }
@@ -62,6 +63,20 @@ function addUser() {
         // else {
         //     addReviewstoUser(doc.ops[0]._id.toString(),120);
         // }
+    })
+}
+function addAdmin(ID){
+    var admins = dbConnection.collection('admins');
+
+
+    d = [{
+        "userId":ID
+    }];
+
+    admins.insertOne(d[0], function(err,doc){
+        if (err){
+            console.log("Could not add admin 1");
+        }
     })
 }
 
@@ -157,8 +172,7 @@ function addtest(ID1,ID2) {
     var favs = dbConnection.collection('favs');
     var reviews = dbConnection.collection('reviews');
 
-    var date = new Date();
-    date.setFullYear(2020, 0, 14);
+    var date = new Date(2020, 0, 14);
 
     d = [{
         "userId": ID1.toString(),
