@@ -17,6 +17,7 @@ import edu.cmu.sv.app17.helpers.APPCrypt;
 import edu.cmu.sv.app17.helpers.APPListResponse;
 import edu.cmu.sv.app17.helpers.APPResponse;
 import edu.cmu.sv.app17.helpers.PATCH;
+import edu.cmu.sv.app17.models.Fav;
 import edu.cmu.sv.app17.models.Review;
 import edu.cmu.sv.app17.models.User;
 import org.bson.Document;
@@ -31,6 +32,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -127,7 +129,6 @@ public class UserInterface {
             query.put("userId", id);
             long resultCount = reviewCollection.count(query);
 
-
             BasicDBObject sortParams = new BasicDBObject();
             List<String> sortList = Arrays.asList(sortArg.split(","));
             sortList.forEach(sortItem -> {
@@ -163,7 +164,7 @@ public class UserInterface {
     @Path("{id}/reviews")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse create(@PathParam("id") String id, Object request) {
+    public APPResponse create(@PathParam("id") String id, Object request) throws ParseException {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
@@ -179,7 +180,7 @@ public class UserInterface {
         if (!json.has("reviewContent"))
             throw new APPBadRequestException(55, "missing reviewContent");
 
-        String createdt = json.getString("createDate");//"2013-03-26"
+        String createdt = json.getString("createDate");
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date parsedate = df.parse(createdt);
 
@@ -249,6 +250,64 @@ public class UserInterface {
         }
         return new APPResponse();
     }
+
+    @GET
+    @Path("{id}/favs")
+    @Produces({MediaType.APPLICATION_JSON})
+    public APPResponse getFavsForUser(@Context HttpHeaders headers, @PathParam("id") String id) {
+
+        ArrayList<Fav> favList = new ArrayList<Fav>();
+        BasicDBObject query = new BasicDBObject();
+
+        try {
+            query.put("userId", new ObjectId(id));
+            FindIterable<Document> results = collection.find(query);
+            if (results == null) {
+                throw new APPNotFoundException(0, "Favs not found.");
+            }
+            for(Document item: results){
+                Fav fav = new Fav(
+                        item.getString("userId"),
+                        item.getString("showId")
+                );
+                fav.setId(item.getObjectId("_id").toString());
+                favList.add(fav);
+            }
+            return new APPResponse(favList);
+
+        } catch(APPNotFoundException e) {
+            throw new APPNotFoundException(0,"No such fav");
+        } catch(IllegalArgumentException e) {
+            throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happened, pinch me!");
+        }
+
+    }
+
+    @POST
+    @Path("{id}/favs")
+    @Consumes({ MediaType.APPLICATION_JSON})
+    @Produces({ MediaType.APPLICATION_JSON})
+    public APPResponse createfav(@PathParam("id") String id, Object request) throws ParseException {
+        JSONObject json = null;
+        try {
+            json = new JSONObject(ow.writeValueAsString(request));
+        } catch (JsonProcessingException e) {
+            throw new APPBadRequestException(33, e.getMessage());
+        }
+        if (!json.has("userId"))
+            throw new APPBadRequestException(55, "missing userId");
+        if (!json.has("showId"))
+            throw new APPBadRequestException(55, "missing showId");
+
+        Document doc = new Document("showId", json.getString("showId"))
+                .append("userId", json.getString("userId"));
+        favCollection.insertOne(doc);
+        return new APPResponse();
+    }
+
+
 
 //    @DELETE
 //    @Path("{id}")
