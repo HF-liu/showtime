@@ -21,8 +21,12 @@ import org.json.JSONException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,7 +47,7 @@ public class ReviewInterface {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse getAll(@DefaultValue("_id") @QueryParam("sort") String sortArg){
+    public APPResponse getAll(@DefaultValue("_id") @QueryParam("sort") String sortArg) {
 
         ArrayList<Review> reviewList = new ArrayList<Review>();
 
@@ -59,14 +63,10 @@ public class ReviewInterface {
                 String showId = item.getString("showId");
                 Review review = new Review(
                         showId,
-                        item.getString("episodeId"),
                         item.getString("userId"),
-                        item.getInteger("rate"),
-                        item.getString("createDate"),
-                        item.getString("editDate"),
+                        item.getDate("createDate"),
                         item.getString("reviewTopic"),
-                        item.getString("reviewContent"),
-                        item.getInteger("likes")
+                        item.getString("reviewContent")
                 );
                 review.setId(item.getObjectId("_id").toString());
                 reviewList.add(review);
@@ -78,8 +78,8 @@ public class ReviewInterface {
             e.printStackTrace();
             throw new APPInternalServerException(99,e.getMessage());
         }
-
     }
+
 
     @GET
     @Path("{id}")
@@ -97,14 +97,10 @@ public class ReviewInterface {
             }
             Review review = new Review(
                     item.getString("showId"),
-                    item.getString("episodeId"),
                     item.getString("userId"),
-                    item.getInteger("rate"),
-                    item.getString("createDate"),
-                    item.getString("editDate"),
+                    item.getDate("createDate"),
                     item.getString("reviewTopic"),
-                    item.getString("reviewContent"),
-                    item.getInteger("likes")
+                    item.getString("reviewContent")
             );
             review.setId(item.getObjectId("_id").toString());
             return new APPResponse(review);
@@ -119,11 +115,13 @@ public class ReviewInterface {
     }
 
 
+
+
     @PATCH
     @Path("{id}")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse update(@PathParam("id") String id, Object request) {
+    public APPResponse update(@PathParam("id") String id, Object request) throws ParseException {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
@@ -137,25 +135,21 @@ public class ReviewInterface {
             BasicDBObject query = new BasicDBObject();
             query.put("_id", new ObjectId(id));
 
+            String createdt = json.getString("createDate");
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date parsedate = df.parse(createdt);
+
             Document doc = new Document();
             if (json.has("showId"))
                 doc.append("showId",json.getString("showId"));
-            if (json.has("episodeId"))
-                doc.append("episodeId",json.getString("episodeId"));
             if (json.has("userId"))
                 doc.append("userId",json.getString("userId"));
-            if (json.has("rate"))
-                doc.append("rate",json.getInt("rate"));
             if (json.has("createDate"))
-                doc.append("createDate",json.getString("createDate"));
-            if (json.has("editDate"))
-                doc.append("editDate",json.getString("editDate"));
+                doc.append("createDate",parsedate);
             if (json.has("reviewTopic"))
                 doc.append("reviewTopic",json.getString("reviewTopic"));
             if (json.has("reviewContent"))
                 doc.append("reviewContent",json.getString("reviewContent"));
-            if (json.has("likes"))
-                doc.append("likes",json.getInt("likes"));
             Document set = new Document("$set", doc);
             collection.updateOne(query,set);
 
