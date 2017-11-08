@@ -5,10 +5,10 @@ import java.util.Date;
 public class Calendar {
     String calendarId = null;
     String userId;
-    Date date;
+    String date;
     String event;
 
-    public Calendar(String userId, Date date, String event) {
+    public Calendar(String userId, String date, String event) {
         this.userId = userId;
         this.date = date;
         this.event = event;
