@@ -17,6 +17,7 @@ import edu.cmu.sv.app17.helpers.APPCrypt;
 import edu.cmu.sv.app17.helpers.APPListResponse;
 import edu.cmu.sv.app17.helpers.APPResponse;
 import edu.cmu.sv.app17.helpers.PATCH;
+import edu.cmu.sv.app17.models.Calendar;
 import edu.cmu.sv.app17.models.Fav;
 import edu.cmu.sv.app17.models.Review;
 import edu.cmu.sv.app17.models.User;
@@ -45,6 +46,7 @@ public class UserInterface {
     private MongoCollection<Document> reviewCollection;
     private MongoCollection<Document> favCollection;
     private MongoCollection<Document> adminCollection;
+    private MongoCollection<Document> calCollection;
     private ObjectWriter ow;
 
 
@@ -56,6 +58,7 @@ public class UserInterface {
         this.reviewCollection = database.getCollection("reviews");
         this.favCollection = database.getCollection("favs");
         this.adminCollection = database.getCollection("admins");
+        this.calCollection = database.getCollection("cals");
         ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
     }
@@ -325,7 +328,83 @@ public class UserInterface {
         return new APPResponse();
     }
 
+    @GET
+    @Path("{id}/caldendars")
+    @Produces({MediaType.APPLICATION_JSON})
+    public APPListResponse getCalsForUser(@Context HttpHeaders headers, @PathParam("id") String id,
+                                             @DefaultValue("_id") @QueryParam("sort") String sortArg,
+                                             @DefaultValue("20") @QueryParam("count") int count,
+                                             @DefaultValue("0") @QueryParam("offset") int offset
+    ) {
 
+        ArrayList<Calendar> calList = new ArrayList<Calendar>();
+
+        try {
+            //checkAuthentication(headers,id);
+            BasicDBObject query = new BasicDBObject();
+            query.put("userId", id);
+            long resultCount = calCollection.count(query);
+
+            BasicDBObject sortParams = new BasicDBObject();
+            List<String> sortList = Arrays.asList(sortArg.split(","));
+            sortList.forEach(sortItem -> {
+                sortParams.put(sortItem,1);
+            });
+
+            FindIterable<Document> results = calCollection.find(query).sort(sortParams).skip(offset).limit(count);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+            for (Document item : results) {
+                String userId = id;
+                Calendar cal = new Calendar(
+                        userId,
+                        sdf.format(item.getDate("date")),
+                        item.getString("event")
+                );
+                cal.setId(item.getObjectId("_id").toString());
+                calList.add(cal);
+            }
+            return new APPListResponse(calList,resultCount,offset,calList.size());
+
+        } catch(APPNotFoundException e) {
+            throw new APPNotFoundException(0,"No such cals");
+        } catch(IllegalArgumentException e) {
+            throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happened, pinch me!");
+        }
+
+    }
+
+    @POST
+    @Path("{id}/calendars")
+    @Consumes({ MediaType.APPLICATION_JSON})
+    @Produces({ MediaType.APPLICATION_JSON})
+    public APPResponse createcal(@PathParam("id") String id, Object request) throws ParseException {
+        JSONObject json = null;
+        try {
+            json = new JSONObject(ow.writeValueAsString(request));
+            if (!json.has("date"))
+                throw new APPBadRequestException(55, "missing date");
+            if (!json.has("event"))
+                throw new APPBadRequestException(55, "missing event");
+
+            String createdt = json.getString("date");
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date parsedate = df.parse(createdt);
+
+            Document doc = new Document("date", parsedate)
+                    .append("event", json.getString("event"))
+                    .append("userId",id);
+            favCollection.insertOne(doc);
+        } catch (JSONException e) {
+            System.out.println("Failed to create a calendar");
+
+        } catch (JsonProcessingException e) {
+            throw new APPBadRequestException(33, e.getMessage());
+        }
+        return new APPResponse();
+    }
 
 //    @DELETE
 //    @Path("{id}")
