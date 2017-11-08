@@ -62,19 +62,26 @@ public class AdminInterface {
     public APPResponse getAll() {
 
         ArrayList<Admin> adminList = new ArrayList<Admin>();
-
-        FindIterable<Document> results = adminCollection.find();
-        if (results == null) {
+        try {
+            FindIterable<Document> results = adminCollection.find();
+            if (results == null) {
+                return new APPResponse(adminList);
+            }
+            for (Document item : results) {
+                Admin admin = new Admin(
+                        item.getString("userId")
+                );
+                admin.setId(item.getObjectId("_id").toString());
+                adminList.add(admin);
+            }
             return new APPResponse(adminList);
+        }  catch(APPNotFoundException e) {
+            throw new APPNotFoundException(0,"There are no admins.");
+        } catch(IllegalArgumentException e) {
+            throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happened, pinch me!");
         }
-        for (Document item : results) {
-            Admin admin = new Admin(
-                    item.getString("userId")
-            );
-            admin.setId(item.getObjectId("_id").toString());
-            adminList.add(admin);
-        }
-        return new APPResponse(adminList);
     }
 
     @GET
@@ -95,7 +102,7 @@ public class AdminInterface {
             return new APPResponse(admin);
 
         } catch(APPNotFoundException e) {
-            throw new APPNotFoundException(0,"No such admin");
+            throw new APPNotFoundException(0,"No such admin.");
         } catch(IllegalArgumentException e) {
             throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
         }  catch(Exception e) {
