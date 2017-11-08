@@ -329,7 +329,7 @@ public class UserInterface {
     }
 
     @GET
-    @Path("{id}/caldendars")
+    @Path("{id}/calendars")
     @Produces({MediaType.APPLICATION_JSON})
     public APPListResponse getCalsForUser(@Context HttpHeaders headers, @PathParam("id") String id,
                                              @DefaultValue("_id") @QueryParam("sort") String sortArg,
@@ -396,7 +396,7 @@ public class UserInterface {
             Document doc = new Document("date", parsedate)
                     .append("event", json.getString("event"))
                     .append("userId",id);
-            favCollection.insertOne(doc);
+            calCollection.insertOne(doc);
         } catch (JSONException e) {
             System.out.println("Failed to create a calendar");
 

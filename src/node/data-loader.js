@@ -52,6 +52,7 @@ function addUser() {
             console.log("Could not add user 1");
         }
         addAdmin(doc.ops[0]._id.toString());
+        addCal(doc.ops[0]._id.toString());
         // else {
         //     addReviewstoUser(doc.ops[0]._id.toString(),100);
         // }
@@ -60,6 +61,7 @@ function addUser() {
         if (err){
             console.log("Could not add user 2");
         }
+        addCal(doc.ops[0]._id.toString());
         // else {
         //     addReviewstoUser(doc.ops[0]._id.toString(),120);
         // }
@@ -76,6 +78,32 @@ function addAdmin(ID){
     admins.insertOne(d[0], function(err,doc){
         if (err){
             console.log("Could not add admin 1");
+        }
+    })
+}
+
+function addCal(ID){
+    var cals = dbConnection.collection('cals');
+
+    d = [{
+        "userId": ID,
+        "date" : new Date(2017,10,14),
+        "event" : "Test Events"+ID
+
+    },{
+        "userId": ID,
+        "date" : new Date(2017,10,24),
+        "event" : "Just Kidding"+ID
+    }]
+    cals.insertOne(d[0], function(err,doc){
+        if (err){
+            console.log("Could not add cal 1");
+        }
+    })
+
+    cals.insertOne(d[1], function(err,doc){
+        if (err){
+            console.log("Could not add cal 2");
         }
     })
 }
