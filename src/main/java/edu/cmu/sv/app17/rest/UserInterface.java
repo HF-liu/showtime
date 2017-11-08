@@ -65,21 +65,29 @@ public class UserInterface {
     public APPResponse getAll() {
 
         ArrayList<User> userList = new ArrayList<User>();
-
-        FindIterable<Document> results = collection.find();
-        if (results == null) {
+        try {
+            FindIterable<Document> results = collection.find();
+            if (results == null) {
+                return new APPResponse(userList);
+            }
+            for (Document item : results) {
+                User user = new User(
+                        item.getString("userName"),
+                        item.getString("email"),
+                        item.getString("password")
+                );
+                user.setId(item.getObjectId("_id").toString());
+                userList.add(user);
+            }
             return new APPResponse(userList);
+        } catch(APPNotFoundException e) {
+            throw new APPNotFoundException(0,"There are no users.");
+        } catch(IllegalArgumentException e) {
+            throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happened, pinch me!");
         }
-        for (Document item : results) {
-            User user = new User(
-                    item.getString("userName"),
-                    item.getString("email"),
-                    item.getString("password")
-            );
-            user.setId(item.getObjectId("_id").toString());
-            userList.add(user);
-        }
-        return new APPResponse(userList);
+
     }
 
     @GET
@@ -152,10 +160,12 @@ public class UserInterface {
             }
             return new APPListResponse(reviewList,resultCount,offset,reviewList.size());
 
-        } catch(Exception e) {
-            System.out.println("EXCEPTION!");
-            e.printStackTrace();
-            throw new APPInternalServerException(99,e.getMessage());
+        } catch(APPNotFoundException e) {
+            throw new APPNotFoundException(0,"No such reviews");
+        } catch(IllegalArgumentException e) {
+            throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happened, pinch me!");
         }
 
     }
@@ -169,29 +179,32 @@ public class UserInterface {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
+
+            if (!json.has("showId"))
+                throw new APPBadRequestException(55, "missing showId");
+            if (!json.has("createDate"))
+                throw new APPBadRequestException(55, "missing createDate");
+            if (!json.has("reviewTopic"))
+                throw new APPBadRequestException(55, "missing reviewTopic");
+            if (!json.has("reviewContent"))
+                throw new APPBadRequestException(55, "missing reviewContent");
+
+            String createdt = json.getString("createDate");
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date parsedate = df.parse(createdt);
+
+            Document doc = new Document("showId", json.getString("showId"))
+                    .append("createDate", parsedate)
+                    .append("reviewTopic", json.getString("reviewTopic"))
+                    .append("reviewContent", json.getString("reviewContent"))
+                    .append("userId", id);
+            reviewCollection.insertOne(doc);
+            return new APPResponse(request);
         } catch (JsonProcessingException e) {
             throw new APPBadRequestException(33, e.getMessage());
+        } catch (JSONException e) {
+            throw new APPBadRequestException(33, e.getMessage());
         }
-        if (!json.has("showId"))
-            throw new APPBadRequestException(55, "missing showId");
-        if (!json.has("createDate"))
-            throw new APPBadRequestException(55, "missing createDate");
-        if (!json.has("reviewTopic"))
-            throw new APPBadRequestException(55, "missing reviewTopic");
-        if (!json.has("reviewContent"))
-            throw new APPBadRequestException(55, "missing reviewContent");
-
-        String createdt = json.getString("createDate");
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date parsedate = df.parse(createdt);
-
-        Document doc = new Document("showId", json.getString("showId"))
-                .append("createDate", parsedate)
-                .append("reviewTopic", json.getString("reviewTopic"))
-                .append("reviewContent", json.getString("reviewContent"))
-                .append("userId", id);
-        reviewCollection.insertOne(doc);
-        return new APPResponse();
     }
 
     @POST
@@ -201,21 +214,24 @@ public class UserInterface {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(obj));
+            if (!json.has("userName"))
+                throw new APPBadRequestException(55, "missing userName");
+            if (!json.has("email"))
+                throw new APPBadRequestException(55, "missing email");
+            if (!json.has("password"))
+                throw new APPBadRequestException(55, "missing password");
+
+            Document doc = new Document("userName", json.getString("userName"))
+                    .append("email", json.getString("email"))
+                    .append("password", json.getString("password"));
+            collection.insertOne(doc);
+            return new APPResponse(obj);
+        } catch (JSONException e) {
+            throw new APPBadRequestException(33, e.getMessage());
         } catch (JsonProcessingException e) {
             throw new APPBadRequestException(33, e.getMessage());
         }
-        if (!json.has("userName"))
-            throw new APPBadRequestException(55, "missing userName");
-        if (!json.has("email"))
-            throw new APPBadRequestException(55, "missing email");
-        if (!json.has("password"))
-            throw new APPBadRequestException(55, "missing password");
 
-        Document doc = new Document("userName", json.getString("userName"))
-                .append("email", json.getString("email"))
-                .append("password", json.getString("password"));
-            collection.insertOne(doc);
-        return new APPResponse();
     }
 
     @PATCH
@@ -246,7 +262,7 @@ public class UserInterface {
             collection.updateOne(query, set);
 
         } catch (JSONException e) {
-            System.out.println("Failed to create a document");
+            System.out.println("Failed to edit userinfo");
 
         }
         return new APPResponse();
@@ -294,15 +310,18 @@ public class UserInterface {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
+            if (!json.has("showId"))
+                throw new APPBadRequestException(55, "missing showId");
+
+            Document doc = new Document("showId", json.getString("showId"))
+                    .append("userId", id);
+            favCollection.insertOne(doc);
+        } catch (JSONException e) {
+            System.out.println("Failed to create a fav");
+
         } catch (JsonProcessingException e) {
             throw new APPBadRequestException(33, e.getMessage());
         }
-        if (!json.has("showId"))
-            throw new APPBadRequestException(55, "missing showId");
-
-        Document doc = new Document("showId", json.getString("showId"))
-                .append("userId", id);
-        favCollection.insertOne(doc);
         return new APPResponse();
     }
 
