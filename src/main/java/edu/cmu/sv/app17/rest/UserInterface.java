@@ -65,10 +65,11 @@ public class UserInterface {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse getAll() {
+    public APPResponse getAll(@Context HttpHeaders headers) {
 
         ArrayList<User> userList = new ArrayList<User>();
         try {
+            checkAdmin(headers);
             FindIterable<Document> results = collection.find();
             if (results == null) {
                 return new APPResponse(userList);
@@ -87,6 +88,8 @@ public class UserInterface {
             throw new APPNotFoundException(0,"There are no users.");
         } catch(IllegalArgumentException e) {
             throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
         }  catch(Exception e) {
             throw new APPInternalServerException(99,"Something happened, pinch me!");
         }
@@ -96,9 +99,11 @@ public class UserInterface {
     @GET
     @Path("{id}")
     @Produces({MediaType.APPLICATION_JSON})
-    public APPResponse getOne(@PathParam("id") String id) {
+    public APPResponse getOne(@Context HttpHeaders headers, @PathParam("id") String id) {
         BasicDBObject query = new BasicDBObject();
+
         try {
+            checkSelfandAdmin(headers,id);
             query.put("_id", new ObjectId(id));
             Document item = collection.find(query).first();
             if (item == null) {
@@ -116,6 +121,8 @@ public class UserInterface {
             throw new APPNotFoundException(0,"No such user");
         } catch(IllegalArgumentException e) {
             throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        }catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
         }  catch(Exception e) {
             throw new APPInternalServerException(99,"Something happened, pinch me!");
         }
@@ -420,24 +427,50 @@ public class UserInterface {
 //        return new APPResponse();
 //    }
 
-    void checkAuthentication(HttpHeaders headers,String id) throws Exception{
+    void checkSelfandAdmin(HttpHeaders headers,String id) throws Exception{
         List<String> authHeaders = headers.getRequestHeader(HttpHeaders.AUTHORIZATION);
         if (authHeaders == null)
             throw new APPUnauthorizedException(70,"No Authorization Headers");
         String token = authHeaders.get(0);
         String clearToken = APPCrypt.decrypt(token);
-        if (id.compareTo(clearToken) != 0) {
+
+
+        BasicDBObject query = new BasicDBObject();
+        query.put("userId", clearToken);
+        Document item = adminCollection.find(query).first();
+
+        if ((id.compareTo(clearToken) != 0) && (item == null)) {
             throw new APPUnauthorizedException(71,"Invalid token. Please try getting a new token");
         }
     }
 
-//    void checkAdmin(String id) throws Exception{
-//        BasicDBObject query = new BasicDBObject();
-//        query.put("userId", new ObjectId(id));
-//        Document item = collection.find(query).first();
-//        if (item == null) {
-//            throw new APPNotFoundException(0, "You are not admin.");
-//        }
-//    }
+    void checkAdmin(HttpHeaders headers) throws Exception{
+        List<String> authHeaders = headers.getRequestHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeaders == null)
+            throw new APPUnauthorizedException(70,"No Authorization Headers");
+        String token = authHeaders.get(0);
+        String clearToken = APPCrypt.decrypt(token);
+        BasicDBObject query = new BasicDBObject();
+        query.put("userId", clearToken);
+        Document item = adminCollection.find(query).first();
+        if (item == null) {
+            throw new APPUnauthorizedException(71,"You are not admin");
+        }
+    }
+
+    void checkUser(HttpHeaders headers) throws Exception{
+        List<String> authHeaders = headers.getRequestHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeaders == null)
+            throw new APPUnauthorizedException(70,"No Authorization Headers");
+        String token = authHeaders.get(0);
+        String clearToken = APPCrypt.decrypt(token);
+        BasicDBObject query = new BasicDBObject();
+        query.put("userId", clearToken);
+        Document item = collection.find(query).first();
+        if (item == null) {
+            throw new APPUnauthorizedException(71,"You are not a user.");
+        }
+    }
+
 
 }

@@ -92,14 +92,14 @@ public class AdminInterface {
         try {
             query.put("userId", id);
             Document item = adminCollection.find(query).first();
-            if (item == null) {
-                throw new APPNotFoundException(0, "Admin not found.");
-            }
-            Admin admin = new Admin(
-                    item.getString("userId")
-            );
-            admin.setId(item.getObjectId("_id").toString());
-            return new APPResponse(admin);
+//            if (item == null) {
+//                throw new APPNotFoundException(0, "Admin not found.");
+//            }
+//            Admin admin = new Admin(
+//                    item.getString("userId")
+//            );
+//            admin.setId(item.getObjectId("_id").toString());
+            return new APPResponse(item);
 
         } catch(APPNotFoundException e) {
             throw new APPNotFoundException(0,"No such admin.");
