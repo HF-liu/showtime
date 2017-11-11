@@ -9,15 +9,13 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
+import com.sun.org.apache.regexp.internal.RE;
 import edu.cmu.sv.app17.exceptions.APPBadRequestException;
 import edu.cmu.sv.app17.exceptions.APPInternalServerException;
 import edu.cmu.sv.app17.exceptions.APPNotFoundException;
 import edu.cmu.sv.app17.exceptions.APPUnauthorizedException;
 import edu.cmu.sv.app17.helpers.*;
-import edu.cmu.sv.app17.models.Admin;
-import edu.cmu.sv.app17.models.Fav;
-import edu.cmu.sv.app17.models.Review;
-import edu.cmu.sv.app17.models.User;
+import edu.cmu.sv.app17.models.*;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.json.JSONException;
@@ -37,20 +35,21 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-@Path("admins")
-public class AdminInterface {
-    private MongoCollection<Document> collection;
-    private MongoCollection<Document> reviewCollection;
-    private MongoCollection<Document> favCollection;
+@Path("recommendations")
+
+public class RecommendationInterface {
+    private MongoCollection<Document> userCollection;
     private MongoCollection<Document> adminCollection;
+    private MongoCollection<Document> recCollection;
     private ObjectWriter ow;
 
-    public AdminInterface() {
+    public RecommendationInterface(){
         MongoClient mongoClient = new MongoClient();
         MongoDatabase database = mongoClient.getDatabase("app17-5");
 
-
+        this.userCollection = database.getCollection("users");
         this.adminCollection = database.getCollection("admins");
+        this.recCollection = database.getCollection("recs");
         ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
     }
 
@@ -58,52 +57,62 @@ public class AdminInterface {
     @Produces({ MediaType.APPLICATION_JSON})
     public APPResponse getAll(@Context HttpHeaders headers) {
 
-        ArrayList<Admin> adminList = new ArrayList<>();
+        ArrayList<Recommendation> recList = new ArrayList<>();
         try {
             Authorization.checkAdmin(headers);
-            FindIterable<Document> results = adminCollection.find();
+            FindIterable<Document> results = recCollection.find();
             if (results == null) {
-                return new APPResponse(adminList);
+                return new APPResponse(recList);
             }
             for (Document item : results) {
-                Admin admin = new Admin(
-                        item.getString("userId")
+                Recommendation rec = new Recommendation(
+                        item.getString("userId"),
+                        item.getString("showId")
                 );
-                admin.setId(item.getObjectId("_id").toString());
-                adminList.add(admin);
+                rec.setId(item.getObjectId("_id").toString());
+                recList.add(rec);
             }
-            return new APPResponse(adminList);
-        }  catch(APPNotFoundException e) {
-            throw new APPNotFoundException(0,"There are no admins.");
+            return new APPResponse(recList);
+        } catch(APPNotFoundException e) {
+            throw new APPNotFoundException(0,"There are no users.");
         } catch(IllegalArgumentException e) {
             throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
-        }  catch(APPUnauthorizedException e){
+        } catch(APPUnauthorizedException e){
             throw new APPUnauthorizedException(70,"Not authorized.");
         }  catch(Exception e) {
-            throw new APPInternalServerException(99,"Something happens!");
+            throw new APPInternalServerException(99,"Something happened, pinch me!");
         }
 
     }
 
     @GET
     @Path("{id}")
-    @Produces({MediaType.APPLICATION_JSON})
+    @Produces({ MediaType.APPLICATION_JSON})
     public APPResponse getOne(@Context HttpHeaders headers,@PathParam("id") String id) {
+
+
         BasicDBObject query = new BasicDBObject();
+
         try {
-            Authorization.checkAdmin(headers);
+
             query.put("userId", id);
-            Document item = adminCollection.find(query).first();
-            return new APPResponse(item);
-        } catch(APPNotFoundException e) {
-            throw new APPNotFoundException(0,"No such admin.");
+            Document item = recCollection.find(query).first();
+            Authorization.checkSelfandAdmin(headers,item.getString("userId"));
+            Recommendation rec = new Recommendation(
+                    item.getString("userId"),
+                    item.getString("showId")
+            );
+            rec.setId(item.getObjectId("_id").toString());
+            return new APPResponse(rec);
+
+        } catch(IllegalArgumentException e) {
+            throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
         } catch(APPUnauthorizedException e){
             throw new APPUnauthorizedException(70,"Not authorized.");
-        }  catch(Exception e) {
-            throw new APPInternalServerException(99,"Something happens!");
+        }   catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happened, pinch me!");
         }
 
     }
-
 
 }
