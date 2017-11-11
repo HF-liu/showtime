@@ -13,10 +13,7 @@ import edu.cmu.sv.app17.exceptions.APPBadRequestException;
 import edu.cmu.sv.app17.exceptions.APPInternalServerException;
 import edu.cmu.sv.app17.exceptions.APPNotFoundException;
 import edu.cmu.sv.app17.exceptions.APPUnauthorizedException;
-import edu.cmu.sv.app17.helpers.APPCrypt;
-import edu.cmu.sv.app17.helpers.APPListResponse;
-import edu.cmu.sv.app17.helpers.APPResponse;
-import edu.cmu.sv.app17.helpers.PATCH;
+import edu.cmu.sv.app17.helpers.*;
 import edu.cmu.sv.app17.models.Cast;
 import edu.cmu.sv.app17.models.Review;
 import edu.cmu.sv.app17.models.Show;
@@ -60,10 +57,11 @@ public class ShowsInterface {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse getAll() {
+    public APPResponse getAll(@Context HttpHeaders headers) {
 
         ArrayList<Show> showList = new ArrayList<Show>();
         try {
+            Authorization.checkUser(headers);
             FindIterable<Document> results = showCollection.find();
             if (results == null) {
                 return new APPResponse(showList);
@@ -85,8 +83,10 @@ public class ShowsInterface {
             throw new APPNotFoundException(0,"There are no shows.");
         } catch(IllegalArgumentException e) {
             throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        }  catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
         }  catch(Exception e) {
-            throw new APPInternalServerException(99,"Something happened, pinch me!");
+            throw new APPInternalServerException(99,"Something happens!");
         }
 
     }
@@ -94,9 +94,10 @@ public class ShowsInterface {
     @GET
     @Path("{id}")
     @Produces({MediaType.APPLICATION_JSON})
-    public APPResponse getOne(@PathParam("id") String id) {
+    public APPResponse getOne(@Context HttpHeaders headers, @PathParam("id") String id) {
         BasicDBObject query = new BasicDBObject();
         try {
+            Authorization.checkUser(headers);
             query.put("_id", new ObjectId(id));
             Document item = showCollection.find(query).first();
             if (item == null) {
@@ -117,8 +118,10 @@ public class ShowsInterface {
             throw new APPNotFoundException(0,"No such show");
         } catch(IllegalArgumentException e) {
             throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
         }  catch(Exception e) {
-            throw new APPInternalServerException(99,"Something happened, pinch me!");
+            throw new APPInternalServerException(99,"Something happens!");
         }
 
     }
@@ -135,7 +138,7 @@ public class ShowsInterface {
         ArrayList<Review> reviewList = new ArrayList<Review>();
 
         try {
-            //checkAuthentication(headers,id);
+            Authorization.checkUser(headers);
             BasicDBObject query = new BasicDBObject();
             query.put("showId", id);
             long resultCount = reviewCollection.count(query);
@@ -165,10 +168,10 @@ public class ShowsInterface {
 
         } catch(APPNotFoundException e) {
             throw new APPNotFoundException(0,"No such reviews");
-        } catch(IllegalArgumentException e) {
-            throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
         }  catch(Exception e) {
-            throw new APPInternalServerException(99,"Something happened, pinch me!");
+            throw new APPInternalServerException(99,"Something happens!");
         }
 
     }
@@ -185,7 +188,7 @@ public class ShowsInterface {
         ArrayList<Cast> castList = new ArrayList<Cast>();
 
         try {
-            //checkAuthentication(headers,id);
+            Authorization.checkUser(headers);
             BasicDBObject query = new BasicDBObject();
             query.put("showId", id);
             long resultCount = castCollection.count(query);
@@ -215,8 +218,10 @@ public class ShowsInterface {
             throw new APPNotFoundException(0,"No such casts");
         } catch(IllegalArgumentException e) {
             throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
         }  catch(Exception e) {
-            throw new APPInternalServerException(99,"Something happened, pinch me!");
+            throw new APPInternalServerException(99,"Something happens!");
         }
 
     }
@@ -225,7 +230,8 @@ public class ShowsInterface {
     @Path("{id}")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse update(@PathParam("id") String id, Object request) {
+    public APPResponse update(@Context HttpHeaders headers,
+                              @PathParam("id") String id, Object request) {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
@@ -234,7 +240,7 @@ public class ShowsInterface {
         }
 
         try {
-
+            Authorization.checkAdmin(headers);
             BasicDBObject query = new BasicDBObject();
             query.put("_id", new ObjectId(id));
 
@@ -257,6 +263,10 @@ public class ShowsInterface {
         } catch (JSONException e) {
             System.out.println("Failed to edit showInfo");
 
+        }catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
         }
         return new APPResponse();
     }
@@ -264,9 +274,11 @@ public class ShowsInterface {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse createshow(Object obj) {
+    public APPResponse createshow(@Context HttpHeaders headers,
+                                  Object obj) {
         JSONObject json = null;
         try {
+            Authorization.checkAdmin(headers);
             json = new JSONObject(ow.writeValueAsString(obj));
             if (!json.has("showName"))
                 throw new APPBadRequestException(55, "missing showName");
@@ -293,9 +305,10 @@ public class ShowsInterface {
             throw new APPBadRequestException(33, e.getMessage());
         } catch (JsonProcessingException e) {
             throw new APPBadRequestException(33, e.getMessage());
-        }
-        catch (Exception e) {
-            throw new APPInternalServerException(0, e.getMessage());
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
         }
     }
 
@@ -303,9 +316,12 @@ public class ShowsInterface {
     @Path("{id}/reviews")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse createReview(@PathParam("id") String id, Object request) throws ParseException {
+    public APPResponse createReview(@Context HttpHeaders headers,
+                                    @PathParam("id") String id, Object request) throws ParseException {
         JSONObject json = null;
         try {
+
+
             json = new JSONObject(ow.writeValueAsString(request));
 
             if (!json.has("userId"))
@@ -316,6 +332,8 @@ public class ShowsInterface {
                 throw new APPBadRequestException(55, "missing reviewTopic");
             if (!json.has("reviewContent"))
                 throw new APPBadRequestException(55, "missing reviewContent");
+
+            Authorization.checkSelfandAdmin(headers,json.getString("userId"));
 
             String createdt = json.getString("createDate");
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -332,16 +350,23 @@ public class ShowsInterface {
             throw new APPBadRequestException(33, e.getMessage());
         } catch (JSONException e) {
             throw new APPBadRequestException(33, e.getMessage());
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
         }
+
     }
 
     @POST
     @Path("{id}/casts")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse createCast(@PathParam("id") String id, Object request) throws ParseException {
+    public APPResponse createCast(@Context HttpHeaders headers,
+                                  @PathParam("id") String id, Object request) throws ParseException {
         JSONObject json = null;
         try {
+            Authorization.checkAdmin(headers);
             json = new JSONObject(ow.writeValueAsString(request));
             if (!json.has("castName"))
                 throw new APPBadRequestException(55, "missing castName");
@@ -360,19 +385,33 @@ public class ShowsInterface {
             throw new APPBadRequestException(33, e.getMessage());
         } catch (JSONException e) {
             throw new APPBadRequestException(33, e.getMessage());
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
         }
+
     }
 
     @DELETE
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse delete(@PathParam("id") String id) {
-        BasicDBObject query = new BasicDBObject();
-        query.put("_id", new ObjectId(id));
+    public APPResponse delete(@Context HttpHeaders headers,
+                              @PathParam("id") String id) {
+        try {
+            BasicDBObject query = new BasicDBObject();
+            query.put("_id", new ObjectId(id));
+            Authorization.checkAdmin(headers);
 
-        DeleteResult deleteResult = showCollection.deleteOne(query);
-        if (deleteResult.getDeletedCount() < 1)
-            throw new APPNotFoundException(66,"Could not delete");
+            DeleteResult deleteResult = showCollection.deleteOne(query);
+            if (deleteResult.getDeletedCount() < 1)
+                throw new APPNotFoundException(66, "Could not delete");
+        }catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
+        }
+
 
         return new APPResponse();
     }
