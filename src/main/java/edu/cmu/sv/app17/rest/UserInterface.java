@@ -139,7 +139,7 @@ public class UserInterface {
         ArrayList<Review> reviewList = new ArrayList<Review>();
 
         try {
-            //checkAuthentication(headers,id);
+            Authorization.checkUser(headers);
             BasicDBObject query = new BasicDBObject();
             query.put("userId", id);
             long resultCount = reviewCollection.count(query);
@@ -171,7 +171,9 @@ public class UserInterface {
             throw new APPNotFoundException(0,"No such reviews");
         } catch(IllegalArgumentException e) {
             throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
-        }  catch(Exception e) {
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }   catch(Exception e) {
             throw new APPInternalServerException(99,"Something happened, pinch me!");
         }
 
@@ -182,9 +184,10 @@ public class UserInterface {
     @Path("{id}/reviews")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse create(@PathParam("id") String id, Object request) throws ParseException {
+    public APPResponse create(@Context HttpHeaders headers,@PathParam("id") String id, Object request) throws ParseException {
         JSONObject json = null;
         try {
+            Authorization.checkSelfandAdmin(headers,id);
             json = new JSONObject(ow.writeValueAsString(request));
 
             if (!json.has("showId"))
@@ -209,8 +212,10 @@ public class UserInterface {
             return new APPResponse(request);
         } catch (JsonProcessingException e) {
             throw new APPBadRequestException(33, e.getMessage());
-        } catch (JSONException e) {
-            throw new APPBadRequestException(33, e.getMessage());
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Could not add a user.");
         }
     }
 
@@ -245,7 +250,7 @@ public class UserInterface {
     @Path("{id}")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse update(@PathParam("id") String id, Object request) {
+    public APPResponse update(@Context HttpHeaders headers, @PathParam("id") String id, Object request) {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
@@ -254,6 +259,7 @@ public class UserInterface {
         }
 
         try {
+            Authorization.checkSelfandAdmin(headers,id);
 
             BasicDBObject query = new BasicDBObject();
             query.put("_id", new ObjectId(id));
@@ -268,9 +274,10 @@ public class UserInterface {
             Document set = new Document("$set", doc);
             userCollection.updateOne(query, set);
 
-        } catch (JSONException e) {
-            System.out.println("Failed to edit userinfo");
-
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Could not edit");
         }
         return new APPResponse();
     }
@@ -284,6 +291,7 @@ public class UserInterface {
         BasicDBObject query = new BasicDBObject();
 
         try {
+            Authorization.checkUser(headers);
             query.put("userId", id);
             FindIterable<Document> results = favCollection.find(query);
             if (results == null) {
@@ -303,7 +311,9 @@ public class UserInterface {
             throw new APPNotFoundException(0,"No such fav");
         } catch(IllegalArgumentException e) {
             throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
-        }  catch(Exception e) {
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }   catch(Exception e) {
             throw new APPInternalServerException(99,"Something happened, pinch me!");
         }
 
@@ -313,9 +323,10 @@ public class UserInterface {
     @Path("{id}/favs")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse createfav(@PathParam("id") String id, Object request) throws ParseException {
+    public APPResponse createfav(@Context HttpHeaders headers,@PathParam("id") String id, Object request) throws ParseException {
         JSONObject json = null;
         try {
+            Authorization.checkSelfandAdmin(headers,id);
             json = new JSONObject(ow.writeValueAsString(request));
             if (!json.has("showId"))
                 throw new APPBadRequestException(55, "missing showId");
@@ -328,6 +339,10 @@ public class UserInterface {
 
         } catch (JsonProcessingException e) {
             throw new APPBadRequestException(33, e.getMessage());
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Could not edit");
         }
         return new APPResponse();
     }
@@ -344,7 +359,7 @@ public class UserInterface {
         ArrayList<Calendar> calList = new ArrayList<Calendar>();
 
         try {
-            //checkAuthentication(headers,id);
+            Authorization.checkSelfandAdmin(headers,id);
             BasicDBObject query = new BasicDBObject();
             query.put("userId", id);
             long resultCount = calCollection.count(query);
@@ -374,6 +389,8 @@ public class UserInterface {
             throw new APPNotFoundException(0,"No such cals");
         } catch(IllegalArgumentException e) {
             throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
         }  catch(Exception e) {
             throw new APPInternalServerException(99,"Something happened, pinch me!");
         }
@@ -384,9 +401,10 @@ public class UserInterface {
     @Path("{id}/calendars")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse createcal(@PathParam("id") String id, Object request) throws ParseException {
+    public APPResponse createcal(@Context HttpHeaders headers,@PathParam("id") String id, Object request) throws ParseException {
         JSONObject json = null;
         try {
+            Authorization.checkAdmin(headers);
             json = new JSONObject(ow.writeValueAsString(request));
             if (!json.has("date"))
                 throw new APPBadRequestException(55, "missing date");
@@ -406,6 +424,10 @@ public class UserInterface {
 
         } catch (JsonProcessingException e) {
             throw new APPBadRequestException(33, e.getMessage());
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Could not edit");
         }
         return new APPResponse();
     }
