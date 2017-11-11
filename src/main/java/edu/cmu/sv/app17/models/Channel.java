@@ -5,7 +5,7 @@ public class Channel {
     String channelName;
     String channelLogo;
 
-    public Channel(String channelName, String channelLogo, String showList, Number showNumber) {
+    public Channel(String channelName, String channelLogo) {
         this.channelName = channelName;
         this.channelLogo = channelLogo;
     }

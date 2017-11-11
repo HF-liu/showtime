@@ -13,10 +13,7 @@ import edu.cmu.sv.app17.exceptions.APPBadRequestException;
 import edu.cmu.sv.app17.exceptions.APPInternalServerException;
 import edu.cmu.sv.app17.exceptions.APPNotFoundException;
 import edu.cmu.sv.app17.exceptions.APPUnauthorizedException;
-import edu.cmu.sv.app17.helpers.APPCrypt;
-import edu.cmu.sv.app17.helpers.APPListResponse;
-import edu.cmu.sv.app17.helpers.APPResponse;
-import edu.cmu.sv.app17.helpers.PATCH;
+import edu.cmu.sv.app17.helpers.*;
 import edu.cmu.sv.app17.models.Calendar;
 import edu.cmu.sv.app17.models.Fav;
 import edu.cmu.sv.app17.models.Review;
@@ -42,7 +39,7 @@ import java.util.List;
 
 @Path("users")
 public class UserInterface {
-    private MongoCollection<Document> collection;
+    private MongoCollection<Document> userCollection;
     private MongoCollection<Document> reviewCollection;
     private MongoCollection<Document> favCollection;
     private MongoCollection<Document> adminCollection;
@@ -54,7 +51,7 @@ public class UserInterface {
         MongoClient mongoClient = new MongoClient();
         MongoDatabase database = mongoClient.getDatabase("app17-5");
 
-        this.collection = database.getCollection("users");
+        this.userCollection = database.getCollection("users");
         this.reviewCollection = database.getCollection("reviews");
         this.favCollection = database.getCollection("favs");
         this.adminCollection = database.getCollection("admins");
@@ -69,8 +66,8 @@ public class UserInterface {
 
         ArrayList<User> userList = new ArrayList<User>();
         try {
-            checkAdmin(headers);
-            FindIterable<Document> results = collection.find();
+            Authorization.checkUser(headers);
+            FindIterable<Document> results = userCollection.find();
             if (results == null) {
                 return new APPResponse(userList);
             }
@@ -103,9 +100,9 @@ public class UserInterface {
         BasicDBObject query = new BasicDBObject();
 
         try {
-            checkSelfandAdmin(headers,id);
+            Authorization.checkSelfandAdmin(headers,id);
             query.put("_id", new ObjectId(id));
-            Document item = collection.find(query).first();
+            Document item = userCollection.find(query).first();
             if (item == null) {
                 throw new APPNotFoundException(0, "User not found.");
             }
@@ -234,7 +231,7 @@ public class UserInterface {
             Document doc = new Document("userName", json.getString("userName"))
                     .append("email", json.getString("email"))
                     .append("password", json.getString("password"));
-            collection.insertOne(doc);
+            userCollection.insertOne(doc);
             return new APPResponse(obj);
         } catch (JSONException e) {
             throw new APPBadRequestException(33, e.getMessage());
@@ -269,7 +266,7 @@ public class UserInterface {
             if (json.has("password"))
                 doc.append("password", json.getString("password"));
             Document set = new Document("$set", doc);
-            collection.updateOne(query, set);
+            userCollection.updateOne(query, set);
 
         } catch (JSONException e) {
             System.out.println("Failed to edit userinfo");
@@ -427,50 +424,6 @@ public class UserInterface {
 //        return new APPResponse();
 //    }
 
-    void checkSelfandAdmin(HttpHeaders headers,String id) throws Exception{
-        List<String> authHeaders = headers.getRequestHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeaders == null)
-            throw new APPUnauthorizedException(70,"No Authorization Headers");
-        String token = authHeaders.get(0);
-        String clearToken = APPCrypt.decrypt(token);
-
-
-        BasicDBObject query = new BasicDBObject();
-        query.put("userId", clearToken);
-        Document item = adminCollection.find(query).first();
-
-        if ((id.compareTo(clearToken) != 0) && (item == null)) {
-            throw new APPUnauthorizedException(71,"Invalid token. Please try getting a new token");
-        }
-    }
-
-    void checkAdmin(HttpHeaders headers) throws Exception{
-        List<String> authHeaders = headers.getRequestHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeaders == null)
-            throw new APPUnauthorizedException(70,"No Authorization Headers");
-        String token = authHeaders.get(0);
-        String clearToken = APPCrypt.decrypt(token);
-        BasicDBObject query = new BasicDBObject();
-        query.put("userId", clearToken);
-        Document item = adminCollection.find(query).first();
-        if (item == null) {
-            throw new APPUnauthorizedException(71,"You are not admin");
-        }
-    }
-
-    void checkUser(HttpHeaders headers) throws Exception{
-        List<String> authHeaders = headers.getRequestHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeaders == null)
-            throw new APPUnauthorizedException(70,"No Authorization Headers");
-        String token = authHeaders.get(0);
-        String clearToken = APPCrypt.decrypt(token);
-        BasicDBObject query = new BasicDBObject();
-        query.put("userId", clearToken);
-        Document item = collection.find(query).first();
-        if (item == null) {
-            throw new APPUnauthorizedException(71,"You are not a user.");
-        }
-    }
 
 
 }

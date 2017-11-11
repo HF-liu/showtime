@@ -12,6 +12,7 @@ import edu.cmu.sv.app17.exceptions.APPInternalServerException;
 import edu.cmu.sv.app17.exceptions.APPNotFoundException;
 import edu.cmu.sv.app17.helpers.APPCrypt;
 import edu.cmu.sv.app17.helpers.APPResponse;
+import edu.cmu.sv.app17.helpers.Authorization;
 import edu.cmu.sv.app17.models.User;
 import edu.cmu.sv.app17.models.Session;
 import org.bson.Document;
@@ -55,7 +56,6 @@ public class SessionsInterface {
             if (!json.has("password"))
                 throw new APPBadRequestException(55, "missing password");
             BasicDBObject query = new BasicDBObject();
-
             query.put("email", json.getString("email"));
             query.put("password", APPCrypt.encrypt(json.getString("password")));
 
