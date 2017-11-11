@@ -204,5 +204,35 @@ public class ChannelInterface {
         return new APPResponse();
     }
 
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON})
+    @Produces({ MediaType.APPLICATION_JSON})
+    public APPResponse createshow(@Context HttpHeaders headers,
+                                  Object obj) {
+        JSONObject json = null;
+        try {
+            Authorization.checkAdmin(headers);
+            json = new JSONObject(ow.writeValueAsString(obj));
+            if (!json.has("channelName"))
+                throw new APPBadRequestException(55, "missing channelName");
+            if (!json.has("ChannelLogo"))
+                throw new APPBadRequestException(55, "missing ChannelLogo");
+
+
+            Document doc = new Document("channelName", json.getString("channelName"))
+                    .append("channelLogo", json.getString("channelLogo"));
+            channelCollection.insertOne(doc);
+            return new APPResponse(obj);
+        } catch (JSONException e) {
+            throw new APPBadRequestException(33, e.getMessage());
+        } catch (JsonProcessingException e) {
+            throw new APPBadRequestException(33, e.getMessage());
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
+        }
+    }
+
 
 }
