@@ -13,10 +13,7 @@ import edu.cmu.sv.app17.exceptions.APPBadRequestException;
 import edu.cmu.sv.app17.exceptions.APPInternalServerException;
 import edu.cmu.sv.app17.exceptions.APPNotFoundException;
 import edu.cmu.sv.app17.exceptions.APPUnauthorizedException;
-import edu.cmu.sv.app17.helpers.APPCrypt;
-import edu.cmu.sv.app17.helpers.APPListResponse;
-import edu.cmu.sv.app17.helpers.APPResponse;
-import edu.cmu.sv.app17.helpers.PATCH;
+import edu.cmu.sv.app17.helpers.*;
 import edu.cmu.sv.app17.models.Admin;
 import edu.cmu.sv.app17.models.Fav;
 import edu.cmu.sv.app17.models.Review;
@@ -59,10 +56,11 @@ public class AdminInterface {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse getAll() {
+    public APPResponse getAll(@Context HttpHeaders headers) {
 
         ArrayList<Admin> adminList = new ArrayList<Admin>();
         try {
+            Authorization.checkAdmin(headers);
             FindIterable<Document> results = adminCollection.find();
             if (results == null) {
                 return new APPResponse(adminList);
@@ -79,34 +77,30 @@ public class AdminInterface {
             throw new APPNotFoundException(0,"There are no admins.");
         } catch(IllegalArgumentException e) {
             throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        }  catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
         }  catch(Exception e) {
-            throw new APPInternalServerException(99,"Something happened, pinch me!");
+            throw new APPInternalServerException(99,"Something happens!");
         }
+
     }
 
     @GET
     @Path("{id}")
     @Produces({MediaType.APPLICATION_JSON})
-    public APPResponse getOne(@PathParam("id") String id) {
+    public APPResponse getOne(@Context HttpHeaders headers,@PathParam("id") String id) {
         BasicDBObject query = new BasicDBObject();
         try {
+            Authorization.checkAdmin(headers);
             query.put("userId", id);
             Document item = adminCollection.find(query).first();
-//            if (item == null) {
-//                throw new APPNotFoundException(0, "Admin not found.");
-//            }
-//            Admin admin = new Admin(
-//                    item.getString("userId")
-//            );
-//            admin.setId(item.getObjectId("_id").toString());
             return new APPResponse(item);
-
         } catch(APPNotFoundException e) {
             throw new APPNotFoundException(0,"No such admin.");
-        } catch(IllegalArgumentException e) {
-            throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
         }  catch(Exception e) {
-            throw new APPInternalServerException(99,"Something happened, pinch me!");
+            throw new APPInternalServerException(99,"Something happens!");
         }
 
     }
