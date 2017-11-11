@@ -71,7 +71,7 @@ public class ShowsInterface {
             for (Document item : results) {
                 Show show = new Show(
                         item.getString("showName"),
-                        item.getString("channelID"),
+                        item.getString("channelId"),
                         item.getString("intro"),
                         item.getString("showCategory"),
                         item.getString("showphoto"),
@@ -104,7 +104,7 @@ public class ShowsInterface {
             }
             Show show = new Show(
                     item.getString("showName"),
-                    item.getString("channelID"),
+                    item.getString("channelId"),
                     item.getString("intro"),
                     item.getString("showCategory"),
                     item.getString("showphoto"),

@@ -85,7 +85,7 @@ showList = ['s1','s2'];
 channelList = ['c1','c2'];
 introList = ['Long long ago','Long ago','Not too long ago','Last year','Last month','Last week','Yesterday','Several hours ago','Just now'];
 categoryList = ['Awful','Disgusting','Too bad','Worst', 'Not recommend', 'Waste of time','Not too bad', 'Just fine', 'Could be better', 'So cool', 'Hilarious','Amazing','Best ever', 'Watched it twice'];
-photoList = ['url1','url2','url3','url4'];
+photoList = ['https://dg31sz3gwrwan.cloudfront.net/poster/95011/1227618-4-optimized.jpg','https://dg31sz3gwrwan.cloudfront.net/poster/281617/1236906-4-optimized.jpg','https://dg31sz3gwrwan.cloudfront.net/poster/80379/1146198-4-optimized.jpg','https://dg31sz3gwrwan.cloudfront.net/poster/248835/1231221-4-optimized.jpg'];
 
 
 function addShow() {
@@ -130,19 +130,20 @@ function addCast(ID){
         "showId":ID,
         "castName" : "Jim Parsons",
         "roles" : "Sheldon Cooper",
-        "castPhoto" : "url10"
+        "castPhoto" : "https://dg31sz3gwrwan.cloudfront.net/actor/80379/325467_medium-optimized-2.jpg"
     },
         {
             "showId":ID,
-            "castName" : "Jesse Tyler Ferguson",
+            "castName" : "Jesse Tyler" +
+            "",
             "roles" : "Mitchell Pritchett",
-            "castPhoto" : "url11"
+            "castPhoto" : "https://dg31sz3gwrwan.cloudfront.net/actor/95011/319496_medium-optimized-2.jpg"
         },
         {
             "showId":ID,
             "castName" : "Lana Parrilla",
             "roles" : "Evil Queen",
-            "castPhoto" : "url11"
+            "castPhoto" : "https://dg31sz3gwrwan.cloudfront.net/actor/248835/325954_medium-optimized-2.jpg"
         }];
 
     casts.insertOne(d[0], function(err,doc){
