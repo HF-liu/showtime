@@ -6,6 +6,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import edu.cmu.sv.app17.exceptions.APPUnauthorizedException;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.util.List;
@@ -53,7 +54,7 @@ public class Authorization {
         String token = authHeaders.get(0);
         String clearToken = APPCrypt.decrypt(token);
         BasicDBObject query = new BasicDBObject();
-        query.put("userId", clearToken);
+        query.put("_id", new ObjectId(clearToken));
         Document item = userCollection.find(query).first();
         if (item == null) {
             throw new APPUnauthorizedException(71,"You are not a user.");
