@@ -23,6 +23,8 @@ public class Authorization {
         List<String> authHeaders = headers.getRequestHeader(HttpHeaders.AUTHORIZATION);
         if (authHeaders == null)
             throw new APPUnauthorizedException(70,"No Authorization Headers");
+        if (id == null)
+            throw new APPUnauthorizedException(70,"No id found");
         String token = authHeaders.get(0);
         String clearToken = APPCrypt.decrypt(token);
         BasicDBObject query = new BasicDBObject();
