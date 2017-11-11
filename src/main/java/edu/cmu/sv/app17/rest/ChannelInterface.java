@@ -41,6 +41,7 @@ public class ChannelInterface {
     private MongoCollection<Document> reviewCollection;
     private MongoCollection<Document> channelCollection;
     private MongoCollection<Document> adminCollection;
+    private MongoCollection<Document> showCollection;
     private ObjectWriter ow;
 
 
@@ -52,6 +53,7 @@ public class ChannelInterface {
         this.reviewCollection = database.getCollection("reviews");
         this.adminCollection = database.getCollection("admins");
         this.channelCollection = database.getCollection("channels");
+        this.showCollection = database.getCollection("shows");
         ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
     }
 
@@ -87,11 +89,120 @@ public class ChannelInterface {
 
     }
 
+    @GET
+    @Path("{id}")
+    @Produces({ MediaType.APPLICATION_JSON})
+    public APPResponse getOne(@Context HttpHeaders headers,@PathParam("id") String id) {
 
 
+        BasicDBObject query = new BasicDBObject();
+
+        try {
+            Authorization.checkUser(headers);
+            query.put("_id", new ObjectId(id));
+            Document item = channelCollection.find(query).first();
+            if (item == null) {
+                throw new APPNotFoundException(0, "Channel not found.");
+            }
+            Channel channel = new Channel(
+                    item.getString("channelName"),
+                    item.getString("channelLogo")
+            );
+            channel.setId(item.getObjectId("_id").toString());
+            return new APPResponse(channel);
+
+        } catch(IllegalArgumentException e) {
+            throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }   catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happened, pinch me!");
+        }
 
 
+    }
 
+    @GET
+    @Path("{id}/shows")
+    @Produces({MediaType.APPLICATION_JSON})
+    public APPResponse getFavsForUser(@Context HttpHeaders headers, @PathParam("id") String id) {
+
+        ArrayList<Show> showList = new ArrayList<>();
+        BasicDBObject query = new BasicDBObject();
+
+        try {
+            Authorization.checkUser(headers);
+            query.put("channelId", id);
+            FindIterable<Document> results = showCollection.find(query);
+            if (results == null) {
+                throw new APPNotFoundException(0, "Shows not found.");
+            }
+            for(Document item: results){
+                Show show = new Show(
+                        item.getString("showName"),
+                        item.getString("channelId"),
+                        item.getString("intro"),
+                        item.getString("showCategory"),
+                        item.getString("showphoto"),
+                        item.getInteger("showRating")
+                );
+                show.setId(item.getObjectId("_id").toString());
+                showList.add(show);
+            }
+            return new APPResponse(showList);
+
+        } catch(APPNotFoundException e) {
+            throw new APPNotFoundException(0,"No such fav");
+        } catch(IllegalArgumentException e) {
+            throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }   catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happened, pinch me!");
+        }
+
+    }
+
+    @PATCH
+    @Path("{id}")
+    @Consumes({ MediaType.APPLICATION_JSON})
+    @Produces({ MediaType.APPLICATION_JSON})
+    public APPResponse update(@Context HttpHeaders headers,@PathParam("id") String id, Object request) throws ParseException {
+        JSONObject json = null;
+        try {
+            json = new JSONObject(ow.writeValueAsString(request));
+        }
+        catch (JsonProcessingException e) {
+            throw new APPBadRequestException(33, e.getMessage());
+        }
+
+        try {
+            Authorization.checkAdmin(headers);
+
+            BasicDBObject query = new BasicDBObject();
+            query.put("_id", new ObjectId(id));
+            Document item = channelCollection.find(query).first();
+
+
+            Document doc = new Document();
+            if (json.has("channelName"))
+                doc.append("channelName",json.getString("channelName"));
+            if (json.has("channelLogo"))
+                doc.append("channelLogo",json.getString("channelLogo"));
+
+            Document set = new Document("$set", doc);
+            channelCollection.updateOne(query,set);
+
+        } catch(JSONException e) {
+            System.out.println("Failed to update a document");
+
+        }catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
+        }
+        return new APPResponse();
+    }
 
 
 }
