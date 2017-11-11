@@ -126,5 +126,45 @@ public class NewsInterface {
 
     }
 
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON})
+    @Produces({ MediaType.APPLICATION_JSON})
+    public APPResponse createNews(@Context HttpHeaders headers,
+                                  Object obj) {
+        JSONObject json = null;
+        try {
+            Authorization.checkAdmin(headers);
+            json = new JSONObject(ow.writeValueAsString(obj));
+            if (!json.has("source"))
+                throw new APPBadRequestException(55, "missing source");
+            if (!json.has("date"))
+                throw new APPBadRequestException(55, "missing date");
+            if (!json.has("title"))
+                throw new APPBadRequestException(55, "missing title");
+            if (!json.has("content"))
+                throw new APPBadRequestException(55, "missing content");
+
+            String createdt = json.getString("date");
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date parsedate = df.parse(createdt);
+
+
+            Document doc = new Document("source", json.getString("source"))
+                    .append("date", parsedate)
+                    .append("title", json.getString("title"))
+                    .append("content", json.getString("content"));
+            newsCollection.insertOne(doc);
+            return new APPResponse(obj);
+        } catch (JSONException e) {
+            throw new APPBadRequestException(33, e.getMessage());
+        } catch (JsonProcessingException e) {
+            throw new APPBadRequestException(33, e.getMessage());
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
+        }
+    }
+
 
 }
