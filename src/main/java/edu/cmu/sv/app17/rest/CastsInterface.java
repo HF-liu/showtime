@@ -5,7 +5,9 @@ import com.mongodb.MongoSocketOpenException;
 import edu.cmu.sv.app17.exceptions.APPBadRequestException;
 import edu.cmu.sv.app17.exceptions.APPInternalServerException;
 import edu.cmu.sv.app17.exceptions.APPNotFoundException;
+import edu.cmu.sv.app17.exceptions.APPUnauthorizedException;
 import edu.cmu.sv.app17.helpers.APPResponse;
+import edu.cmu.sv.app17.helpers.Authorization;
 import edu.cmu.sv.app17.helpers.PATCH;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.mongodb.BasicDBObject;
@@ -21,6 +23,8 @@ import org.json.JSONException;
 
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +49,7 @@ public class CastsInterface {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse getAll(@DefaultValue("_id") @QueryParam("sort") String sortArg) {
+    public APPResponse getAll(@Context HttpHeaders headers, @DefaultValue("_id") @QueryParam("sort") String sortArg) {
 
         ArrayList<Cast> castList = new ArrayList<Cast>();
 
@@ -56,6 +60,7 @@ public class CastsInterface {
         });
 
         try {
+            Authorization.checkUser(headers);
             FindIterable<Document> results = collection.find().sort(sortParams);
             for (Document item : results) {
                 String showId = item.getString("showId");
@@ -70,10 +75,10 @@ public class CastsInterface {
             }
             return new APPResponse(castList);
 
-        } catch(Exception e) {
-            System.out.println("EXCEPTION!!!!");
-            e.printStackTrace();
-            throw new APPInternalServerException(99,e.getMessage());
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
         }
 
     }
@@ -81,11 +86,12 @@ public class CastsInterface {
     @GET
     @Path("{id}")
     @Produces({MediaType.APPLICATION_JSON})
-    public APPResponse getOne(@PathParam("id") String id) {
+    public APPResponse getOne(@Context HttpHeaders headers,@PathParam("id") String id) {
         BasicDBObject query = new BasicDBObject();
         try {
             query.put("_id", new ObjectId(id));
             Document item = collection.find(query).first();
+            Authorization.checkUser(headers);
             if (item == null) {
                 throw new APPNotFoundException(0, "Sorry, no such cast.");
             }
@@ -102,8 +108,10 @@ public class CastsInterface {
             throw new APPNotFoundException(0,"No such cast");
         } catch(IllegalArgumentException e) {
             throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
+        }  catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
         }  catch(Exception e) {
-            throw new APPInternalServerException(99,"Something happened, pinch me!");
+            throw new APPInternalServerException(99,"Something happens!");
         }
 
     }
@@ -112,7 +120,7 @@ public class CastsInterface {
     @Path("{id}")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse update(@PathParam("id") String id, Object request) {
+    public APPResponse update(@Context HttpHeaders headers,@PathParam("id") String id, Object request) {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
@@ -122,6 +130,7 @@ public class CastsInterface {
         }
 
         try {
+            Authorization.checkAdmin(headers);
 
             BasicDBObject query = new BasicDBObject();
             query.put("_id", new ObjectId(id));
@@ -138,9 +147,10 @@ public class CastsInterface {
             Document set = new Document("$set", doc);
             collection.updateOne(query,set);
 
-        } catch(JSONException e) {
-            System.out.println("Failed to create a document");
-
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
         }
         return new APPResponse();
     }
@@ -149,13 +159,20 @@ public class CastsInterface {
     @DELETE
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse delete(@PathParam("id") String id) {
-        BasicDBObject query = new BasicDBObject();
-        query.put("_id", new ObjectId(id));
+    public APPResponse delete(@Context HttpHeaders headers,@PathParam("id") String id) {
+        try {
+            Authorization.checkAdmin(headers);
+            BasicDBObject query = new BasicDBObject();
+            query.put("_id", new ObjectId(id));
 
-        DeleteResult deleteResult = collection.deleteOne(query);
-        if (deleteResult.getDeletedCount() < 1)
-            throw new APPNotFoundException(66,"Could not delete");
+            DeleteResult deleteResult = collection.deleteOne(query);
+            if (deleteResult.getDeletedCount() < 1)
+                throw new APPNotFoundException(66, "Could not delete");
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
+        }
 
         return new APPResponse();
     }
