@@ -187,4 +187,41 @@ public class CalendarInterface {
         return new APPResponse();
     }
 
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON})
+    @Produces({ MediaType.APPLICATION_JSON})
+    public APPResponse createshow(@Context HttpHeaders headers,
+                                  Object obj) {
+        JSONObject json = null;
+        try {
+            Authorization.checkAdmin(headers);
+            json = new JSONObject(ow.writeValueAsString(obj));
+            if (!json.has("userId"))
+                throw new APPBadRequestException(55, "missing userId");
+            if (!json.has("date"))
+                throw new APPBadRequestException(55, "missing date");
+            if (!json.has("event"))
+                throw new APPBadRequestException(55, "missing event");
+
+            String createdt = json.getString("date");
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date parsedate = df.parse(createdt);
+
+
+            Document doc = new Document("userId", json.getString("userId"))
+                    .append("date", parsedate)
+                    .append("event", json.getString("event"));
+            collection.insertOne(doc);
+            return new APPResponse(obj);
+        } catch (JSONException e) {
+            throw new APPBadRequestException(33, e.getMessage());
+        } catch (JsonProcessingException e) {
+            throw new APPBadRequestException(33, e.getMessage());
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
+        }
+    }
+
 }

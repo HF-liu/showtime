@@ -3,7 +3,7 @@ package edu.cmu.sv.app17.models;
 import java.util.Date;
 
 public class News {
-    String newId = null;
+    String newsId = null;
     String source;
     String date;
     String title;
@@ -17,6 +17,6 @@ public class News {
     }
 
     public void setId(String id) {
-        this.newId = id;
+        this.newsId = id;
     }
 }
