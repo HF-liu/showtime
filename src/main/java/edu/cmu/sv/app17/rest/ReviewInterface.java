@@ -5,7 +5,9 @@ import com.mongodb.MongoSocketOpenException;
 import edu.cmu.sv.app17.exceptions.APPBadRequestException;
 import edu.cmu.sv.app17.exceptions.APPInternalServerException;
 import edu.cmu.sv.app17.exceptions.APPNotFoundException;
+import edu.cmu.sv.app17.exceptions.APPUnauthorizedException;
 import edu.cmu.sv.app17.helpers.APPResponse;
+import edu.cmu.sv.app17.helpers.Authorization;
 import edu.cmu.sv.app17.helpers.PATCH;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.mongodb.BasicDBObject;
@@ -20,6 +22,8 @@ import org.bson.types.ObjectId;
 import org.json.JSONException;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -47,7 +51,7 @@ public class ReviewInterface {
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse getAll(@DefaultValue("_id") @QueryParam("sort") String sortArg) {
+    public APPResponse getAll(@Context HttpHeaders headers, @DefaultValue("_id") @QueryParam("sort") String sortArg) {
 
         ArrayList<Review> reviewList = new ArrayList<Review>();
 
@@ -58,6 +62,7 @@ public class ReviewInterface {
         });
 
         try {
+            Authorization.checkUser(headers);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             FindIterable<Document> results = collection.find().sort(sortParams);
             for (Document item : results) {
@@ -74,7 +79,9 @@ public class ReviewInterface {
             }
             return new APPResponse(reviewList);
 
-        } catch(Exception e) {
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
             System.out.println("EXCEPTION!");
             e.printStackTrace();
             throw new APPInternalServerException(99,e.getMessage());
@@ -85,12 +92,13 @@ public class ReviewInterface {
     @GET
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse getOne(@PathParam("id") String id) {
+    public APPResponse getOne(@Context HttpHeaders headers,@PathParam("id") String id) {
 
 
         BasicDBObject query = new BasicDBObject();
 
         try {
+            Authorization.checkUser(headers);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             query.put("_id", new ObjectId(id));
             Document item = collection.find(query).first();
@@ -109,7 +117,9 @@ public class ReviewInterface {
 
         } catch(IllegalArgumentException e) {
             throw new APPBadRequestException(45,"Doesn't look like MongoDB ID");
-        }  catch(Exception e) {
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }   catch(Exception e) {
             throw new APPInternalServerException(99,"Something happened, pinch me!");
         }
 
@@ -123,7 +133,7 @@ public class ReviewInterface {
     @Path("{id}")
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse update(@PathParam("id") String id, Object request) throws ParseException {
+    public APPResponse update(@Context HttpHeaders headers,@PathParam("id") String id, Object request) throws ParseException {
         JSONObject json = null;
         try {
             json = new JSONObject(ow.writeValueAsString(request));
@@ -136,7 +146,8 @@ public class ReviewInterface {
 
             BasicDBObject query = new BasicDBObject();
             query.put("_id", new ObjectId(id));
-
+            Document item = collection.find(query).first();
+            Authorization.checkSelfandAdmin(headers,item.getString("userId"));
 
 
             Document doc = new Document();
@@ -162,6 +173,10 @@ public class ReviewInterface {
         } catch(JSONException e) {
             System.out.println("Failed to update a document");
 
+        }catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
         }
         return new APPResponse();
     }
@@ -170,13 +185,20 @@ public class ReviewInterface {
     @DELETE
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse delete(@PathParam("id") String id) {
+    public APPResponse delete(@Context HttpHeaders headers,@PathParam("id") String id) {
         BasicDBObject query = new BasicDBObject();
         query.put("_id", new ObjectId(id));
-
-        DeleteResult deleteResult = collection.deleteOne(query);
-        if (deleteResult.getDeletedCount() < 1)
-            throw new APPNotFoundException(66,"Could not delete");
+        try {
+            Document item = collection.find(query).first();
+            Authorization.checkSelfandAdmin(headers,item.getString("userId"));
+            DeleteResult deleteResult = collection.deleteOne(query);
+            if (deleteResult.getDeletedCount() < 1)
+                throw new APPNotFoundException(66, "Could not delete");
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
+        }
 
         return new APPResponse();
     }
