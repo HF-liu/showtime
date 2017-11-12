@@ -207,7 +207,7 @@ public class ChannelInterface {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON})
     @Produces({ MediaType.APPLICATION_JSON})
-    public APPResponse createshow(@Context HttpHeaders headers,
+    public APPResponse createchannel(@Context HttpHeaders headers,
                                   Object obj) {
         JSONObject json = null;
         try {
@@ -215,10 +215,8 @@ public class ChannelInterface {
             json = new JSONObject(ow.writeValueAsString(obj));
             if (!json.has("channelName"))
                 throw new APPBadRequestException(55, "missing channelName");
-            if (!json.has("ChannelLogo"))
+            if (!json.has("channelLogo"))
                 throw new APPBadRequestException(55, "missing ChannelLogo");
-
-
             Document doc = new Document("channelName", json.getString("channelName"))
                     .append("channelLogo", json.getString("channelLogo"));
             channelCollection.insertOne(doc);

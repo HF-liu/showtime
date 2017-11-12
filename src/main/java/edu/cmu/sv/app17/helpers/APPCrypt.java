@@ -12,7 +12,7 @@ public class APPCrypt {
 
     public static void  main(String argv[]){
         try {
-            String message ="This is the message";
+            String message ="Test";
             System.out.println("Raw message " + message);
             String enryptedMessage = APPCrypt.encrypt(message);
             System.out.println("Encrypted message: " + enryptedMessage);
