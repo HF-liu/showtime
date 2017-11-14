@@ -9,7 +9,7 @@ $(function() {
     window.onload= onLoadFunction();
 
     function onLoadFunction(){
-        alert(isAdmin);
+        alert("Under Construction");
     }
 
 
