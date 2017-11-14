@@ -235,13 +235,15 @@ public class UserInterface {
 
             Document doc = new Document("userName", json.getString("userName"))
                     .append("email", json.getString("email"))
-                    .append("password", json.getString("password"));
+                    .append("password", APPCrypt.encrypt(json.getString("password")));
             userCollection.insertOne(doc);
             return new APPResponse(obj);
         } catch (JSONException e) {
             throw new APPBadRequestException(33, e.getMessage());
         } catch (JsonProcessingException e) {
             throw new APPBadRequestException(33, e.getMessage());
+        } catch (Exception e){
+            throw new APPInternalServerException(99,"Something goes wrong.");
         }
 
     }
@@ -270,7 +272,7 @@ public class UserInterface {
             if (json.has("email"))
                 doc.append("email", json.getString("email"));
             if (json.has("password"))
-                doc.append("password", json.getString("password"));
+                doc.append("password", APPCrypt.encrypt(json.getString("password")));
             Document set = new Document("$set", doc);
             userCollection.updateOne(query, set);
 

@@ -228,5 +228,5 @@ $(function() {
                     alert("Failed to edit!");
                 })
         });
-    })
+    });
 })
