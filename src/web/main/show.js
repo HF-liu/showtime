@@ -43,6 +43,7 @@ $(function() {
             jQuery.ajax({
 
                 url: "/api/shows/" + showId,
+                // url: "/api/shows/" + $('#show0').value();
                 type: "GET"
             }).done(function (data) {
                 var content = data.content;

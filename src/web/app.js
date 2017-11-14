@@ -22,35 +22,36 @@ $(function() {
             $("#resourceTable").find(".cloned").remove();
             token = data.content.token;
             userId = data.content.userId;
+            location.href = "main/main.html"
         })
             .fail(function(data){
                 $("#greeting").text("You might want to try it again");
                 $("#loadcontent").hide();
             })
-    });
-
-    $("#loadcontent").click(function (e) {
-        e.preventDefault();
-        loadReview();
-    });
-
-    $("#next").click(function(e){
-        e.preventDefault();
-        if (offset+count < total) {
-            offset = offset+count;
-            loadReview();
-        }
     })
-
-    $("#previous").click(function(e){
-        e.preventDefault();
-        console.log("Cliked")
-        if (offset-count >= 0) {
-            offset = offset-count;
-            loadReview();
-
-        }
-    })
+//
+//     $("#loadcontent").click(function (e) {
+//         e.preventDefault();
+//         loadReview();
+//     });
+//
+//     $("#next").click(function(e){
+//         e.preventDefault();
+//         if (offset+count < total) {
+//             offset = offset+count;
+//             loadReview();
+//         }
+//     })
+//
+//     $("#previous").click(function(e){
+//         e.preventDefault();
+//         console.log("Cliked")
+//         if (offset-count >= 0) {
+//             offset = offset-count;
+//             loadReview();
+//
+//         }
+//     })
 
     function loadReview() {
         jQuery.ajax ({
@@ -77,7 +78,7 @@ $(function() {
                 });
             })
             .fail(function(data){
-                $("#reviewlist").text("Sorry no cars");
+                $("#reviewlist").text("Sorry no reviewss");
             })
 
     }
