@@ -8,7 +8,10 @@ $(function() {
 
     jQuery.ajax({
         url: "/api/shows",
-        type: "GET"
+        type: "GET",
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader ("Authorization", token);
+        }
     }).done(function (data) {
         var dataList = data.content;
         //alert(dataList.length);
@@ -46,7 +49,10 @@ $(function() {
 
                 url: "/api/shows/" + showId,
                 // url: "/api/shows/" + $('#show0').value();
-                type: "GET"
+                type: "GET",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader ("Authorization", token);
+                }
             }).done(function (data) {
                 var content = data.content;
                 //alert("channel:" + content.channelId + "intro:" + content.intro + "showCategory:" + content.showCategory);
