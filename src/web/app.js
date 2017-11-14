@@ -22,7 +22,7 @@ $(function() {
             $("#resourceTable").find(".cloned").remove();
             token = data.content.token;
             userId = data.content.userId;
-            location.href = "main/main.html"
+            location.href = "show/show.html"
         })
             .fail(function(data){
                 $("#greeting").text("You might want to try it again");
