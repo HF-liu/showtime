@@ -1,8 +1,10 @@
 $(function() {
+    var token = localStorage.getItem("token");
+    var userId = localStorage.getItem("userId");
+    var isAdmin = localStorage.getItem("isAdmin");
     $('#resourceTable').hide();
 
     //$('#resourceTable').show();
-
 
     jQuery.ajax({
         url: "/api/shows",

@@ -1,4 +1,5 @@
 $(function() {
+    var isAdmin = null;
     var token = null;
     var userId = null;
     var offset = 0;
@@ -13,6 +14,7 @@ $(function() {
         jQuery.ajax ({
             url:  "/api/sessions",
             type: "POST",
+            async: false,
             data: JSON.stringify({email:$("#inputEmail").val(), password: $("#inputPassword").val()}),
             dataType: "json",
             contentType: "application/json; charset=utf-8"
@@ -22,9 +24,26 @@ $(function() {
             $("#resourceTable").find(".cloned").remove();
             token = data.content.token;
             userId = data.content.userId;
+            localStorage.setItem("token", token);
+            localStorage.setItem("userId", userId);
+                $.ajax({
+                    url:  "/api/admins/"+localStorage.getItem("userId"),
+                    type: "GET",
+                    async: false,
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader ("Authorization", localStorage.getItem("token"));
+                    }
+                }).done(function(data){
+                        if(data.content == null){
+                            localStorage.setItem("isAdmin",false);
+                        }else{
+                            localStorage.setItem("isAdmin",true);
+                        }
+                    }).fail(function(data){
+                        localStorage.setItem("isAdmin",false);
+                    })
             location.href = "show/show.html"
-        })
-            .fail(function(data){
+        }).fail(function(data){
                 $("#greeting").text("You might want to try it again");
                 $("#loadcontent").hide();
             })
