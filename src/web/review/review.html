@@ -52,7 +52,7 @@
     </style>
 
 </head>
-<body onload= "onLoadFunction()">
+<body>
 <div class="navbar navbar-inverse navbar-fixed-left">
     <a class="navbar-brand" href="#">ShowTime</a>
 
@@ -69,8 +69,11 @@
 <div class="container">
     <h2>Review List</h2>
 
+    <button type="button" class="btn btn-primary" id="getall">Get All Reviews</button>
+    <button type="button" class="btn btn-primary" id="getmy">Get My Reviews</button>
+    <p></p>
 
-    <table border="1" width="300" id="reviewTable">
+    <table border="1" width="300" class="table table-responsive table-bordered" id="reviewTable" >
         <tr align="center">
             <td>Arthur</td>
             <td>Show</td>
