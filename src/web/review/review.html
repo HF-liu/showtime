@@ -69,7 +69,7 @@
 <div class="container">
     <h2>Review List</h2>
 
-    <button type="button" class="btn btn-primary" id="getall">Get All Reviews</button>
+    <button type="button" class="btn btn-primary" id="getall" style="margin-right:10px">Get All Reviews</button>
     <button type="button" class="btn btn-primary" id="getmy">Get My Reviews</button>
     <p></p>
 
@@ -79,17 +79,47 @@
             <td>Show</td>
             <td>Topic</td>
             <td>Content</td>
+            <td>Operations</td>
         </tr>
         <tr id="reviewRow">
             <td id="Arthur"></td>
             <td id="Show"></td>
             <td id="Topic"></td>
             <td id="Content"></td>
+            <td id="Operations" align="center"></td>
         </tr>
     </table>
 
 </div>
 
+<div class="modal fade" id="editReview" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="recipient-name" class="form-control-label">Topic:</label>
+                        <input id = "topictext" type="text" class="form-control" id="recipient-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="form-control-label">Content:</label>
+                        <textarea id = "contenttext" class="form-control" id="message-text"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id = "closethis" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id = "updatebtn" type="button" class="btn btn-primary">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 </body>
