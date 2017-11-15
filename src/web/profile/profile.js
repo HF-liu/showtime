@@ -149,10 +149,14 @@ $(function() {
                 var obj = Object();
                 obj.userName = $('#usernameinput').val();
                 obj.email = $('#useremailinput').val();
-                if (pwd1 !== null) {
+                obj.password = "";
+                if (pwd1 != "") {
                     obj.password = $('#passwordinput').val();
+                } else {
+                    delete obj['password'];
                 }
                 var patchinfo = JSON.stringify(obj);
+                // alert(patchinfo);
                 jQuery.ajax({
                     url: "/api/users/" + userId,
                     type: "PATCH",
@@ -164,8 +168,8 @@ $(function() {
                     }
                 })
                     .done(function (data) {
-                        $("#closethis").trigger("click");
-                        location.reload();
+                        // $("#closethis").trigger("click");
+                        // location.reload();
                     })
                     .fail(function (data) {
                         alert("Failed to edit!");
