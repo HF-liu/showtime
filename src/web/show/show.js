@@ -46,6 +46,7 @@ $(function() {
 
         function insertTable(showId){
             $('#resourceTable').show();
+
             jQuery.ajax({
 
                 url: "/api/shows/" + showId,

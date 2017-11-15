@@ -54,23 +54,31 @@ $(function() {
         }
 
         function insertTable(castId){
-            $('#resourceTable').cast();
+            $('#castTable').show();
             jQuery.ajax({
-
                 url: "/api/casts/" + castId,
                 type: "GET",
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader("Authorization", token);
                 }
             }).done(function (data) {
-                var content = data.content;
-                //alert("channel:" + content.channelId + "intro:" + content.intro + "castCategory:" + content.castCategory);
-                $('#showId').text(content.showId);
-                $('#castName').text(content.castName);
-                $('#roles').text(content.roles);
+                    var item = data;
 
+                    $("#castRow").clone().prop("id", item.castId).appendTo("#castTable");
+                    $("#" + item.castId).find("#showId").text(item.showId);
+                    $("#" + item.castId).find("#castName").text(item.castName);
+                    $("#" + item.castId).find("#role").text(item.roles);
 
-            })
+                    // var content = data.content;
+                    // //alert("channel:" + content.channelId + "intro:" + content.intro + "castCategory:" + content.castCategory);
+                    // $('#showId').text(content.showId);
+                    // $('#castName').text(content.castName);
+                    // $('#roles').text(content.roles);
+                    $("#" + item.castId).prop("class", "cloned");
+                    $("#" + item.castId).show();
+
+            }).fail(function(data){
+            });
         }
 
         $('#cast0').click(function () {
