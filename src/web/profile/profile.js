@@ -7,7 +7,6 @@ $(function() {
     var total = -1;
 
     window.onload= onLoadFunction();
-
     function onLoadFunction(){
         $("#reviewRow").hide();
         $("#favRow").hide();
@@ -24,6 +23,13 @@ $(function() {
                 $("#userid").text(userId);
                 $("#username").text(data.content.userName);
                 $("#email").text(data.content.email);
+                var identity = null;
+                if(localStorage.getItem("isAdmin") == "true"){
+                    identity = "Admin";
+                } else {
+                    identity = "User";
+                }
+                $("#role").text(identity);
 
             })
             .fail(function(data){
@@ -78,7 +84,44 @@ $(function() {
             .fail(function(data){
             });
 
+        jQuery.ajax ({
+            url:  "/api/users/"+userId+"/favs",
+            type: "GET",
+            async: false,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader ("Authorization", token);
+            }
+        })
+            .done(function(data){
+                data.content.forEach(function(item){
+                    $( "#favRow" ).clone().prop("id",item.favId).appendTo( "#favTable");
 
+                    getShowName(item.showId);
+                    $("#"+item.favId).find("#Show").text(localStorage.getItem("temp"));
+                    $("#"+item.favId).find("#ShowIntro").text(localStorage.getItem("intro"));
+
+
+                    var btn = document.createElement("Button");
+                    var t = document.createTextNode("Unfollow");
+                    btn.appendChild(t);
+                    btn.type = "button";
+                    btn.className = "unfollowbtn btn btn-primary btm-sm btn-default";
+                    // btn.style = "margin-right:10px";
+
+
+                    // var btn = document.createElement("BUTTON");
+                    // var t = document.createTextNode("CLICK ME");
+                    // btn.appendChild(t);
+                    $("#"+item.favId).find("#Operations")[0].appendChild(btn);
+                    // $("#"+item.favId).find("#Operations")[0].appendChild(btn1);
+
+                    $("#"+item.favId).prop("class","cloned");
+                    $("#"+item.favId).show();
+                });
+
+            })
+            .fail(function(data){
+            });
 
     }
 
@@ -158,6 +201,7 @@ $(function() {
         })
             .done(function(data){
                 localStorage.setItem("temp",data.content.showName);
+                localStorage.setItem("intro",data.content.intro);
             })
             .fail(function(data){
             })
@@ -198,5 +242,24 @@ $(function() {
         });
     });
 
+    $("body").on('click','.unfollowbtn',function(){
+
+        var favid = $(this).parents("tr").attr("id");
+        jQuery.ajax ({
+            url:  "/api/favs/"+favid,
+            type: "DELETE",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader ("Authorization", token);
+            }
+        })
+            .done(function(data){
+                alert("Successfully unfollowed!");
+                location.reload();
+            })
+            .fail(function(data){
+                alert("Failed to detele.");
+            })
+
+    });
 
 })
