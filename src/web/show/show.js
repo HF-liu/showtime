@@ -3,7 +3,8 @@ $(function() {
     var userId = localStorage.getItem("userId");
     var isAdmin = localStorage.getItem("isAdmin");
     $('#resourceTable').hide();
-
+    $('#reviewTable').hide();
+    $("#reviewRow").hide();
     //$('#resourceTable').show();
 
     jQuery.ajax({
@@ -31,11 +32,11 @@ $(function() {
                     '</a>' +
                 '</div>'+
                 '<div>' +
-                    '<h2>' +
+                    '<h4>' +
                         '<a id="'+aId+'">' +
                             showName +
                         '</a>' +
-                    '</h2>' +
+                    '</h4>' +
                 '</div>'+
                 '</li>'
             //alert(showDiv);
@@ -65,62 +66,146 @@ $(function() {
             })
         }
 
-        $('#show0').click(function () {
-            insertTable(showIdList[0]);
-            /*
+        function insertRevTable(showId){
+            $('#reviewTable').show();
             jQuery.ajax({
 
-                url: "/api/shows/" + showIdList[0],
-                type: "GET"
+                url: "/api/shows/" + showId + "/reviews",
+                type: "GET",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader ("Authorization", token);
+                }
             }).done(function (data) {
-                var content = data.content;
-                alert("channel:" + content.channelId + "intro:" + content.intro + "showCategory:" + content.showCategory);
-            })
-            */
+                data.content.forEach(function(item){
+                    $( "#reviewRow" ).clone().prop("id",item.reviewId).appendTo( "#reviewTable");
+                    $("#"+item.reviewId).find("#reviewTopic").text(item.reviewTopic);
+                    $("#"+item.reviewId).find("#reviewContent").text(item.reviewContent);
 
+
+                    var btn = document.createElement("Button");
+                    var t = document.createTextNode("Delete");
+                    btn.appendChild(t);
+                    btn.type = "button";
+                    btn.className = "deletereviewbtn btn btn-primary btm-sm btn-default";
+                    btn.style = "margin-right:10px";
+
+                    var btn1 = document.createElement("Button");
+                    var t = document.createTextNode("Edit");
+                    btn1.appendChild(t);
+                    btn1.type = "button";
+                    btn1.className = "editreviewbtn btn btn-primary btm-sm ";
+                    btn1.setAttribute("data-toggle", "modal");
+                    btn1.setAttribute("data-target", "#editReview");
+                    btn1.setAttribute("data-userId", item.userId);
+
+                    // var btn = document.createElement("BUTTON");
+                    // var t = document.createTextNode("CLICK ME");
+                    // btn.appendChild(t);
+                    $("#"+item.reviewId).find("#Operations")[0].appendChild(btn);
+                    $("#"+item.reviewId).find("#Operations")[0].appendChild(btn1);
+
+                    $("#"+item.reviewId).prop("class","cloned");
+                    $("#"+item.reviewId).show();
+                });
+
+            })
+                .fail(function(data){
+                });
+
+                    // $("#Operations").append(btn);
+                    // $("#Operations").append(btn1);
+
+                    $('#editReview').on('show.bs.modal', function (event) {
+                        var button = $(event.relatedTarget) // Button that triggered the modal
+                        var reviewId = button.parents("tr").attr("id");
+                        var topic = button.parents("tr").find("#reviewTopic").text();
+                        var content = button.parents("tr").find("#reviewContent").text();
+                        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+                        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+                        var modal = $(this)
+                        modal.find('.modal-title').text('Now you can edit this review');
+                        // modal.find('.modal-body input').val(topic);
+                        $('#topictext').val(topic);
+                        $('#contenttext').val(content);
+                        // var editedtopic = modal.find('.modal-body input').text();
+                        // var editedcontent = modal.find('.modal-body textarea').text();
+                        $("#updatereview").click(function (e) {
+                            jQuery.ajax({
+                                url: "/api/reviews/" + reviewId,
+                                type: "PATCH",
+                                data: JSON.stringify({
+                                    reviewTopic: $('#topictext').val(),
+                                    reviewContent: $('#contenttext').val()
+                                }),
+                                dataType: "json",
+                                contentType: "application/json; charset=utf-8",
+                                beforeSend: function (xhr) {
+                                    xhr.setRequestHeader("Authorization", token);
+                                }
+                            })
+                                .done(function (data) {
+                                    $("#closereview").trigger("click");
+                                    location.reload();
+                                })
+                                .fail(function (data) {
+                                    alert("Failed to edit!");
+                                })
+                        });
+                    });
+        }
+
+        $('#show0').click(function () {
+            insertTable(showIdList[0]);
+            insertRevTable(showIdList[0]);
         })
         $('#show1').click(function () {
             insertTable(showIdList[1]);
-            /*
-            $('#resourceTable').show();
-            jQuery.ajax({
-
-                url: "/api/shows/" + showIdList[1],
-                type: "GET"
-            }).done(function (data) {
-                var content = data.content;
-                //alert("channel:" + content.channelId + "intro:" + content.intro + "showCategory:" + content.showCategory);
-                $('#channelId').text(content.channelId);
-                $('#intro').text(content.intro);
-            })
-            */
-
-
+            insertRevTable(showIdList[1]);
         })
 
         $('#show2').click(function () {
             insertTable(showIdList[2]);
+            insertRevTable(showIdList[2]);
         })
         $('#show3').click(function () {
             insertTable(showIdList[3]);
+            insertRevTable(showIdList[3]);
         })
         $('#show4').click(function () {
             insertTable(showIdList[4]);
+            insertRevTable(showIdList[4]);
         })
         $('#show5').click(function () {
             insertTable(showIdList[5]);
+            insertRevTable(showIdList[5]);
         })
         $('#show6').click(function () {
             insertTable(showIdList[6]);
+            insertRevTable(showIdList[6]);
         })
         $('#show7').click(function () {
             insertTable(showIdList[7]);
+            insertRevTable(showIdList[7]);
         })
         $('#show8').click(function () {
             insertTable(showIdList[8]);
+            insertRevTable(showIdList[8]);
         })
         $('#show9').click(function () {
             insertTable(showIdList[9]);
+            insertRevTable(showIdList[9]);
+        })
+        $('#show10').click(function () {
+            insertTable(showIdList[10]);
+            insertRevTable(showIdList[10]);
+        })
+        $('#show11').click(function () {
+            insertTable(showIdList[11]);
+            insertRevTable(showIdList[11]);
+        })
+        $('#show12').click(function () {
+            insertTable(showIdList[12]);
+            insertRevTable(showIdList[12]);
         })
     })
 

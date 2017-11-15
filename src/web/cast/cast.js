@@ -9,14 +9,19 @@ $(function() {
 
     jQuery.ajax({
         url: "/api/casts",
-        type: "GET"
+        type: "GET",
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("Authorization", token);
+        }
     }).done(function (data) {
+
         var dataList = data.content;
         //alert(dataList.length);
         var castIdList = new Array();
         for (var i = 0; i < dataList.length; i++) {
             //alert(i);
             var castName = dataList[i].castName;
+            var roles = dataList[i].roles;
             var castId = dataList[i].castId;
             castIdList[i] = castId;
             var imgSrc = dataList[i].castPhoto;
@@ -35,6 +40,13 @@ $(function() {
                         '</a>' +
                     '</h2>' +
                 '</div>'+
+                '<div>' +
+                '   <h4>' +
+                '       <a id="'+aId+'">' + "Role:"+
+                            roles +
+                '       </a>' +
+                '   </h4>' +
+                '</div>'+
                 '</li>'
             //alert(castDiv);
             $('#castRow').append(castDiv);
@@ -46,7 +58,10 @@ $(function() {
             jQuery.ajax({
 
                 url: "/api/casts/" + castId,
-                type: "GET"
+                type: "GET",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", token);
+                }
             }).done(function (data) {
                 var content = data.content;
                 //alert("channel:" + content.channelId + "intro:" + content.intro + "castCategory:" + content.castCategory);
@@ -115,6 +130,7 @@ $(function() {
         $('#cast9').click(function () {
             insertTable(castIdList[9]);
         })
+
     })
 
 })
