@@ -72,35 +72,35 @@ $(function() {
 //         }
 //     })
 
-    function loadReview() {
-        jQuery.ajax ({
-            url:  "/api/users/" + userId + "/reviews?sort=rate&offset=" + offset + "&count="  + count,
-            type: "GET",
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader ("Authorization", token);
-            }
-        })
-            .done(function(data){
-                total = data.metadata.total;
-                $("#page").text("Page " + Math.floor(offset/count+1) + " of " + (Math.ceil(total/count)));
-                $("#resourceTable").find(".cloned").remove();
-                data.content.forEach(function(item){
-                    $( "#resourceRow" ).clone().prop("id",item.reviewId).appendTo( "#resourceTable" );
-                    $("#"+item.reviewId).find("#showId").text(item.showId);
-                    $("#"+item.reviewId).find("#episodeId").text(item.episodeId);
-                    $("#"+item.reviewId).find("#rate").text(item.rate);
-                    $("#"+item.reviewId).find("#topic").text(item.reviewTopic);
-                    $("#"+item.reviewId).find("#content").text(item.reviewContent);
-                    $("#"+item.reviewId).find("#likes").text(item.likes);
-                    $("#"+item.reviewId).prop("class","cloned");
-                    $("#"+item.reviewId).show();
-                });
-            })
-            .fail(function(data){
-                $("#reviewlist").text("Sorry no reviewss");
-            })
-
-    }
+    // function loadReview() {
+    //     jQuery.ajax ({
+    //         url:  "/api/users/" + userId + "/reviews?sort=rate&offset=" + offset + "&count="  + count,
+    //         type: "GET",
+    //         beforeSend: function (xhr) {
+    //             xhr.setRequestHeader ("Authorization", token);
+    //         }
+    //     })
+    //         .done(function(data){
+    //             total = data.metadata.total;
+    //             $("#page").text("Page " + Math.floor(offset/count+1) + " of " + (Math.ceil(total/count)));
+    //             $("#resourceTable").find(".cloned").remove();
+    //             data.content.forEach(function(item){
+    //                 $( "#resourceRow" ).clone().prop("id",item.reviewId).appendTo( "#resourceTable" );
+    //                 $("#"+item.reviewId).find("#showId").text(item.showId);
+    //                 $("#"+item.reviewId).find("#episodeId").text(item.episodeId);
+    //                 $("#"+item.reviewId).find("#rate").text(item.rate);
+    //                 $("#"+item.reviewId).find("#topic").text(item.reviewTopic);
+    //                 $("#"+item.reviewId).find("#content").text(item.reviewContent);
+    //                 $("#"+item.reviewId).find("#likes").text(item.likes);
+    //                 $("#"+item.reviewId).prop("class","cloned");
+    //                 $("#"+item.reviewId).show();
+    //             });
+    //         })
+    //         .fail(function(data){
+    //             $("#reviewlist").text("Sorry no reviewss");
+    //         })
+    //
+    // }
 
 })
 

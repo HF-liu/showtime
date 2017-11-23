@@ -79,6 +79,7 @@ $(function() {
             }).done(function (data) {
                 data.content.forEach(function(item){
                     $( "#reviewRow" ).clone().prop("id",item.reviewId).appendTo( "#reviewTable");
+                    console.log($("#"+item.reviewId))
                     $("#"+item.reviewId).find("#reviewTopic").text(item.reviewTopic);
                     $("#"+item.reviewId).find("#reviewContent").text(item.reviewContent);
 
@@ -94,6 +95,7 @@ $(function() {
                     var t = document.createTextNode("Edit");
                     btn1.appendChild(t);
                     btn1.type = "button";
+                    btn.id = "editButton"
                     btn1.className = "editreviewbtn btn btn-primary btm-sm ";
                     btn1.setAttribute("data-toggle", "modal");
                     btn1.setAttribute("data-target", "#editReview");
@@ -102,9 +104,10 @@ $(function() {
                     // var btn = document.createElement("BUTTON");
                     // var t = document.createTextNode("CLICK ME");
                     // btn.appendChild(t);
-                    $("#"+item.reviewId).find("#Operations")[0].appendChild(btn);
-                    $("#"+item.reviewId).find("#Operations")[0].appendChild(btn1);
-
+                    if ($("#"+item.reviewId).find("#Operations")[0].querySelector("#editButton")== null) {
+                        $("#" + item.reviewId).find("#Operations")[0].appendChild(btn);
+                        $("#" + item.reviewId).find("#Operations")[0].appendChild(btn1);
+                    }
                     $("#"+item.reviewId).prop("class","cloned");
                     $("#"+item.reviewId).show();
                 });
@@ -154,60 +157,73 @@ $(function() {
                         });
                     });
         }
+        for (var j = 0; j < dataList.length; j++) {
+            $('#show' + j).click(createCallback(j,showIdList))
+        }
 
-        $('#show0').click(function () {
-            insertTable(showIdList[0]);
-            insertRevTable(showIdList[0]);
-        })
-        $('#show1').click(function () {
-            insertTable(showIdList[1]);
-            insertRevTable(showIdList[1]);
-        })
 
-        $('#show2').click(function () {
-            insertTable(showIdList[2]);
-            insertRevTable(showIdList[2]);
-        })
-        $('#show3').click(function () {
-            insertTable(showIdList[3]);
-            insertRevTable(showIdList[3]);
-        })
-        $('#show4').click(function () {
-            insertTable(showIdList[4]);
-            insertRevTable(showIdList[4]);
-        })
-        $('#show5').click(function () {
-            insertTable(showIdList[5]);
-            insertRevTable(showIdList[5]);
-        })
-        $('#show6').click(function () {
-            insertTable(showIdList[6]);
-            insertRevTable(showIdList[6]);
-        })
-        $('#show7').click(function () {
-            insertTable(showIdList[7]);
-            insertRevTable(showIdList[7]);
-        })
-        $('#show8').click(function () {
-            insertTable(showIdList[8]);
-            insertRevTable(showIdList[8]);
-        })
-        $('#show9').click(function () {
-            insertTable(showIdList[9]);
-            insertRevTable(showIdList[9]);
-        })
-        $('#show10').click(function () {
-            insertTable(showIdList[10]);
-            insertRevTable(showIdList[10]);
-        })
-        $('#show11').click(function () {
-            insertTable(showIdList[11]);
-            insertRevTable(showIdList[11]);
-        })
-        $('#show12').click(function () {
-            insertTable(showIdList[12]);
-            insertRevTable(showIdList[12]);
-        })
+        function createCallback(j,showIdList){
+            return function(){
+                insertTable(showIdList[j]);
+                insertRevTable(showIdList[j]);
+            }
+        }
+
+
+        //
+        // $('#show0').click(function () {
+        //     insertTable(showIdList[0]);
+        //     insertRevTable(showIdList[0]);
+        // })
+        // $('#show1').click(function () {
+        //     insertTable(showIdList[1]);
+        //     insertRevTable(showIdList[1]);
+        // })
+        //
+        // $('#show2').click(function () {
+        //     insertTable(showIdList[2]);
+        //     insertRevTable(showIdList[2]);
+        // })
+        // $('#show3').click(function () {
+        //     insertTable(showIdList[3]);
+        //     insertRevTable(showIdList[3]);
+        // })
+        // $('#show4').click(function () {
+        //     insertTable(showIdList[4]);
+        //     insertRevTable(showIdList[4]);
+        // })
+        // $('#show5').click(function () {
+        //     insertTable(showIdList[5]);
+        //     insertRevTable(showIdList[5]);
+        // })
+        // $('#show6').click(function () {
+        //     insertTable(showIdList[6]);
+        //     insertRevTable(showIdList[6]);
+        // })
+        // $('#show7').click(function () {
+        //     insertTable(showIdList[7]);
+        //     insertRevTable(showIdList[7]);
+        // })
+        // $('#show8').click(function () {
+        //     insertTable(showIdList[8]);
+        //     insertRevTable(showIdList[8]);
+        // })
+        // $('#show9').click(function () {
+        //     insertTable(showIdList[9]);
+        //     insertRevTable(showIdList[9]);
+        // })
+        // $('#show10').click(function () {
+        //     insertTable(showIdList[10]);
+        //     insertRevTable(showIdList[10]);
+        // })
+        // $('#show11').click(function () {
+        //     insertTable(showIdList[11]);
+        //     insertRevTable(showIdList[11]);
+        // })
+        // $('#show12').click(function () {
+        //     insertTable(showIdList[12]);
+        //     insertRevTable(showIdList[12]);
+        // })
     })
 
 })

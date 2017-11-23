@@ -53,6 +53,7 @@ $(function() {
 
         }
 
+
         function insertTable(castId){
             $('#castTable').show();
             jQuery.ajax({
@@ -62,82 +63,25 @@ $(function() {
                     xhr.setRequestHeader("Authorization", token);
                 }
             }).done(function (data) {
-                    var item = data;
-
-                    $("#castRow").clone().prop("id", item.castId).appendTo("#castTable");
-                    $("#" + item.castId).find("#showId").text(item.showId);
-                    $("#" + item.castId).find("#castName").text(item.castName);
-                    $("#" + item.castId).find("#role").text(item.roles);
-
-                    // var content = data.content;
-                    // //alert("channel:" + content.channelId + "intro:" + content.intro + "castCategory:" + content.castCategory);
-                    // $('#showId').text(content.showId);
-                    // $('#castName').text(content.castName);
-                    // $('#roles').text(content.roles);
-                    $("#" + item.castId).prop("class", "cloned");
-                    $("#" + item.castId).show();
+                var content = data.content;//alert("channel:" + content.channelId + "intro:" + content.intro + "showCategory:" + content.showCategory);
+                $('#showId').text(content.showId);
+                $('#castName').text(content.castName);
+                $('#role').text(content.roles);
 
             }).fail(function(data){
             });
         }
 
-        $('#cast0').click(function () {
-            insertTable(castIdList[0]);
-            /*
-            jQuery.ajax({
-
-                url: "/api/casts/" + castIdList[0],
-                type: "GET"
-            }).done(function (data) {
-                var content = data.content;
-                alert("channel:" + content.channelId + "intro:" + content.intro + "castCategory:" + content.castCategory);
-            })
-            */
-
-        })
-        $('#cast1').click(function () {
-            insertTable(castIdList[1]);
-            /*
-            $('#resourceTable').cast();
-            jQuery.ajax({
-
-                url: "/api/casts/" + castIdList[1],
-                type: "GET"
-            }).done(function (data) {
-                var content = data.content;
-                //alert("channel:" + content.channelId + "intro:" + content.intro + "castCategory:" + content.castCategory);
-                $('#channelId').text(content.channelId);
-                $('#intro').text(content.intro);
-            })
-            */
+        for (var j = 0; j < dataList.length; j++) {
+            $('#cast' + j).click(createCallback(j,castIdList))
+        }
 
 
-        })
-
-        $('#cast2').click(function () {
-            insertTable(castIdList[2]);
-        })
-        $('#cast3').click(function () {
-            insertTable(castIdList[3]);
-        })
-        $('#cast4').click(function () {
-            insertTable(castIdList[4]);
-        })
-        $('#cast5').click(function () {
-            insertTable(castIdList[5]);
-        })
-        $('#cast6').click(function () {
-            insertTable(castIdList[6]);
-        })
-        $('#cast7').click(function () {
-            insertTable(castIdList[7]);
-        })
-        $('#cast8').click(function () {
-            insertTable(castIdList[8]);
-        })
-        $('#cast9').click(function () {
-            insertTable(castIdList[9]);
-        })
+        function createCallback(j,castIdList){
+            return function(){
+                insertTable(castIdList[j]);
+            }
+        }
 
     })
 
