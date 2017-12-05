@@ -6,7 +6,11 @@ $(function() {
     $('#reviewTable').hide();
     $("#reviewRow").hide();
     //$('#resourceTable').show();
-
+    function onLoadFunction(){
+        if(token == null){
+            alert("Not login.");
+        }
+    }
     jQuery.ajax({
         url: "/api/shows",
         type: "GET",
