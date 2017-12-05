@@ -160,6 +160,32 @@ $(function() {
                                 })
                         });
                     });
+
+            $("body").on('click','.deletereviewbtn',function(){
+                // var id=$(this).parents("tr").find("#Arthur").text();
+                // alert(id);
+
+                // var reviewid = $(this).parents("tr").id;
+                var reviewid = $(this).parents("tr").attr("id");
+                console.log(reviewid);
+                // alert(reviewid);
+                jQuery.ajax ({
+                    url:  "/api/reviews/"+reviewid,
+                    type: "DELETE",
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader ("Authorization", token);
+                    }
+                })
+                    .done(function(data){
+                        alert("Successfully deleted!");
+                        location.reload();
+                    })
+                    .fail(function(data){
+                        alert("Failed to detele.");
+                    });
+
+            });
+
         }
         for (var j = 0; j < dataList.length; j++) {
             $('#show' + j).click(createCallback(j,showIdList))

@@ -34,18 +34,11 @@ $(function() {
                     '</a>' +
                 '</div>'+
                 '<div>' +
-                    '<h2>' +
+                    '<h3>' +
                         '<a id="'+aId+'">' +
                             castName +
                         '</a>' +
-                    '</h2>' +
-                '</div>'+
-                '<div>' +
-                '   <h4>' +
-                '       <a id="'+aId+'">' + "Role:"+
-                            roles +
-                '       </a>' +
-                '   </h4>' +
+                    '</h3>' +
                 '</div>'+
                 '</li>'
             //alert(castDiv);
