@@ -42,7 +42,7 @@ $(function() {
                         '</a>' +
                     '</h4>' +
                 '</div>'+
-                '</li>'
+                '</li>';
             //alert(showDiv);
             $('#showRow').append(showDiv);
 
@@ -200,63 +200,47 @@ $(function() {
         }
 
 
-        //
-        // $('#show0').click(function () {
-        //     insertTable(showIdList[0]);
-        //     insertRevTable(showIdList[0]);
-        // })
-        // $('#show1').click(function () {
-        //     insertTable(showIdList[1]);
-        //     insertRevTable(showIdList[1]);
-        // })
-        //
-        // $('#show2').click(function () {
-        //     insertTable(showIdList[2]);
-        //     insertRevTable(showIdList[2]);
-        // })
-        // $('#show3').click(function () {
-        //     insertTable(showIdList[3]);
-        //     insertRevTable(showIdList[3]);
-        // })
-        // $('#show4').click(function () {
-        //     insertTable(showIdList[4]);
-        //     insertRevTable(showIdList[4]);
-        // })
-        // $('#show5').click(function () {
-        //     insertTable(showIdList[5]);
-        //     insertRevTable(showIdList[5]);
-        // })
-        // $('#show6').click(function () {
-        //     insertTable(showIdList[6]);
-        //     insertRevTable(showIdList[6]);
-        // })
-        // $('#show7').click(function () {
-        //     insertTable(showIdList[7]);
-        //     insertRevTable(showIdList[7]);
-        // })
-        // $('#show8').click(function () {
-        //     insertTable(showIdList[8]);
-        //     insertRevTable(showIdList[8]);
-        // })
-        // $('#show9').click(function () {
-        //     insertTable(showIdList[9]);
-        //     insertRevTable(showIdList[9]);
-        // })
-        // $('#show10').click(function () {
-        //     insertTable(showIdList[10]);
-        //     insertRevTable(showIdList[10]);
-        // })
-        // $('#show11').click(function () {
-        //     insertTable(showIdList[11]);
-        //     insertRevTable(showIdList[11]);
-        // })
-        // $('#show12').click(function () {
-        //     insertTable(showIdList[12]);
-        //     insertRevTable(showIdList[12]);
-        // })
-    })
 
-})
+    });
+
+    $('#addShow').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var modal = $(this);
+        // var editedtopic = modal.find('.modal-body input').text();
+        // var editedcontent = modal.find('.modal-body textarea').text();
+        $("#addShowButton").click(function (e) {
+            data = {};
+            data["showName"] = $("#showNameInput").val();
+            data["channelId"] = $("#channelIdInput").val();
+            data["intro"] = $("#introInput").val();
+            data["showCategory"] = $("#showCategoryInput").val();
+            data["showphoto"] = $("#showPhotoInput").val();
+            data["showRating"] = $("#showRatingInput").val();
+
+
+            jQuery.ajax({
+                url: "/api/shows/",
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", token);
+                }
+            })
+                .done(function (data) {
+                    $("#closeAdd").trigger("click");
+                    location.reload();
+                })
+                .fail(function (data) {
+                    alert("Failed to edit!");
+                })
+        });
+    });
+
+});
 
 
 
