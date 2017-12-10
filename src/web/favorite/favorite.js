@@ -51,9 +51,9 @@ $(function() {
 
                     $("#"+item.favId).prop("class","cloned");
                     $("#"+item.favId).show();
-                    if(isAdmin == "false"){
-                        $(".justAdmin").hide();
-                    }
+                    // if(isAdmin == "false"){
+                    //     $(".justAdmin").hide();
+                    // }
                 });
 
             })

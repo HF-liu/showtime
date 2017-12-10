@@ -7,6 +7,9 @@ $(function() {
     var total = -1;
 
     window.onload= onLoadFunction();
+    if(isAdmin == "false"){
+        $(".justAdminall").hide();
+    }
     $("#reviewRow").hide();
     function onLoadFunction(){
         // alert(isAdmin);
