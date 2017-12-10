@@ -6,6 +6,9 @@ $(function() {
     $('#reviewTable').hide();
     $("#reviewRow").hide();
     //$('#resourceTable').show();
+    if(isAdmin == "false"){
+        $(".justAdminall").hide();
+    }
     function onLoadFunction(){
         if(token == null){
             alert("Not login.");
