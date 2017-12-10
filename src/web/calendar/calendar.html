@@ -66,15 +66,57 @@
         <li><a href="../profile/profile.html" align="center">Profile</a></li>
     </ul>
 </div>
+
 <div class="container">
     <h2>Calendar List</h2>
 
+    <button type="button" class="btn btn-primary" id="getall" style="margin-right:10px">Get All Events</button>
+    <button type="button" class="btn btn-primary" id="getmy">Get My Events</button>
+    <p></p>
 
-    </ul>
-
+    <table border="1" width="300" class="table table-responsive table-bordered" id="calTable" >
+        <tr align="center">
+            <td>Date</td>
+            <td>Event</td>
+            <td>Operations</td>
+        </tr>
+        <tr id="calRow">
+            <td id="Date"></td>
+            <td id="Event"></td>
+            <td id="Operations" align="center"></td>
+        </tr>
+    </table>
 
 </div>
 
+<div class="modal fade" id="editEvent" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="recipient-name" class="form-control-label">Date:</label>
+                        <input type="text" class="form-control" id="recipient-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="message-text" class="form-control-label">Event:</label>
+                        <textarea class="form-control" id="message-text"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id = "closethis" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id = "updatebtn" type="button" class="btn btn-primary">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 </body>
