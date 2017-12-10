@@ -70,7 +70,8 @@
     <h2>Review List</h2>
 
     <button type="button" class="btn btn-primary" id="getall" style="margin-right:10px">Get All Reviews</button>
-    <button type="button" class="btn btn-primary" id="getmy">Get My Reviews</button>
+    <button type="button" class="btn btn-primary" id="getmy" style="margin-right:10px">Get My Reviews</button>
+    <!--<button type="button" class="btn btn-primary" id="postnew" style="margin-right:10px" data-toggle="modal" data-target="#postReview">Post Review</button>-->
     <p></p>
 
     <table border="1" width="300" class="table table-responsive table-bordered" id="reviewTable" >
@@ -121,6 +122,44 @@
     </div>
 </div>
 
+<div class="modal fade" id="postReview" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel1">New message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!--<div class="dropdown">-->
+                    <!--<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+                        <!--Dropdown button-->
+                    <!--</button>-->
+                    <!--<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">-->
+                        <!--<a class="dropdown-item" href="#">Action</a>-->
+                        <!--<a class="dropdown-item" href="#">Another action</a>-->
+                        <!--<a class="dropdown-item" href="#">Something else here</a>-->
+                    <!--</div>-->
+                <!--</div>-->
+                <form>
+                    <div class="form-group">
+                        <label for="review-topic" class="form-control-label">Topic:</label>
+                        <input id = "newtopic" type="text" class="form-control" id="review-topic">
+                    </div>
+                    <div class="form-group">
+                        <label for="review-content" class="form-control-label">Content:</label>
+                        <textarea id = "newcontent" class="form-control" id="review-content"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id = "closenew" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id = "updatenew" type="button" class="btn btn-primary">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

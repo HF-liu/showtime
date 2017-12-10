@@ -229,4 +229,41 @@ $(function() {
                 })
         });
     });
+
+    $("#postnew").on('show.bs.modal', function (event) {
+        alert("true!");
+        var button = $(event.relatedTarget) // Button that triggered the modal
+
+
+        // var reviewId = button.parents("tr").attr("id");
+        // var topic = button.parents("tr").find("#Topic").text();
+        // var content = button.parents("tr").find("#Content").text();
+        // // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        // var modal = $(this)
+        // modal.find('.modal-title').text('Now you can edit this review');
+        // // modal.find('.modal-body input').val(topic);
+        // $('#topictext').val(topic);
+        // $('#contenttext').val(content);
+        // // var editedtopic = modal.find('.modal-body input').text();
+        // // var editedcontent = modal.find('.modal-body textarea').text();
+        // $("#updatebtn").click(function (e) {
+        //     jQuery.ajax ({
+        //         url:  "/api/reviews/"+reviewId,
+        //         type: "PATCH",
+        //         data: JSON.stringify({reviewTopic:$('#topictext').val(), reviewContent: $('#contenttext').val()}),
+        //         dataType: "json",
+        //         contentType: "application/json; charset=utf-8",
+        //         beforeSend: function (xhr) {
+        //             xhr.setRequestHeader ("Authorization", token);
+        //         }
+        //     })
+        //         .done(function(data){
+        //             $("#closethis").trigger("click");
+        //         })
+        //         .fail(function(data){
+        //             alert("Failed to edit!");
+        //         })
+        // });
+    });
 })
