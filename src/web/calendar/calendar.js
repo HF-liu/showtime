@@ -8,8 +8,13 @@ $(function() {
 
     window.onload= onLoadFunction();
     $("#calRow").hide();
+    if(isAdmin == "false"){
+        $(".justAdmin").hide();
+    }
     function onLoadFunction(){
         //alert("Under Construction");
+        // alert(isAdmin);
+
     }
     $("#getall").click(function (e) {
         e.preventDefault();
@@ -56,6 +61,9 @@ $(function() {
 
                     $("#"+item.calendarId).prop("class","cloned");
                     $("#"+item.calendarId).show();
+                    if(isAdmin == "false"){
+                        $(".justAdmin").hide();
+                    }
 
                 });
             })
@@ -109,6 +117,10 @@ $(function() {
 
                     $("#"+item.calendarId).prop("class","cloned");
                     $("#"+item.calendarId).show();
+
+                    if(isAdmin == "false"){
+                        $(".justAdmin").hide();
+                    }
 
                     // $(".deletebtn1").hide();
                 });
