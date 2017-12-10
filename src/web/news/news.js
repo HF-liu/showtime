@@ -8,6 +8,10 @@ $(function() {
 
     window.onload= onLoadFunction();
 
+    if(isAdmin == "false"){
+        $(".justAdminall").hide();
+    }
+
     function onLoadFunction(){
         if(token == null){
             alert("Not login.");
