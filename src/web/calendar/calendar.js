@@ -199,4 +199,40 @@ $(function() {
         });
     });
 
+
+    $("#postnew").on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        // var calid = button.parents("tr").attr("id");
+        // var date = button.parents("tr").find("#Date").text();
+        // var eventcontent = button.parents("tr").find("#Event").text();
+        alert("here it is!");
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var modal = $(this)
+        modal.find('.modal-title').text('Now you can edit this event');
+        // modal.find('.modal-body input').val(topic);
+        // $('#recipient-name').val(date);
+        // $('#message-text').val(eventcontent);
+        // var editedtopic = modal.find('.modal-body input').text();
+        // var editedcontent = modal.find('.modal-body textarea').text();
+        $("#updatecontent").click(function (e) {
+            jQuery.ajax ({
+                url:  "/api/calendars/"+calid,
+                type: "PATCH",
+                data: JSON.stringify({date:$('#recipient-name').val(), event: $('#message-text').val()}),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader ("Authorization", token);
+                }
+            })
+                .done(function(data){
+                    $("#closewindow").trigger("click");
+                })
+                .fail(function(data){
+                    alert("Failed to edit!");
+                })
+        });
+    });
+
 })
