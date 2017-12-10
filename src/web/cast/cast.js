@@ -6,7 +6,9 @@ $(function() {
 
     //$('#resourceTable').cast();
 
-
+    if(isAdmin == "false"){
+        $(".justAdmin").hide();
+    }
     jQuery.ajax({
         url: "/api/casts",
         type: "GET",
