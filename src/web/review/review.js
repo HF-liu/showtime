@@ -112,7 +112,7 @@ $(function() {
                 });
             })
             .fail(function(data){
-                $("#carlist").text("Sorry no cars");
+
             })
     });
 
