@@ -67,15 +67,70 @@
     </ul>
 </div>
 <div class="container">
+   <div class="row">
     <h2>News List</h2>
+    <button class="btn btn-primary col-sm-offset-9 col-sm-2" id="add-cast-button" data-toggle="modal" data-target="#addNews">
+    Add News</button>
+   </div>
+<table class="table" id="newsTable">
+        <thead class="thead-dark">
+        <tr>
+            <th scope="col">Source</th>
+            <th scope="col">Date</th>
+            <th scope="col">Title</th>
+            <th scope="col">Content</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr id="newsRow">
+            <td id="Source"></td>
+            <td id="Date"></td>
+            <td id="Title"></td>
+            <td id="Content"></td>
+        </tr>
 
-
-    </ul>
-
+        </tbody>
+    </table>
 
 </div>
 
+<div class="modal fade" id="addNews" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="popUpHead">Now you can add news!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label class="form-control-label">Source:</label>
+                        <input id = "sourceInput" type="text" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-control-label">Date:</label>
+                        <input id = "dateInput" type="text" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-control-label">Title:</label>
+                        <input id = "titleInput" type="text" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-control-label">Content:</label>
+                        <input id = "contentInput" type="text" class="form-control">
+                    </div>
 
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id = "closeAdd" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button id = "addnewsButton" type="button" class="btn btn-primary">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
