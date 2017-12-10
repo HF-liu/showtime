@@ -155,6 +155,41 @@ public class CastsInterface {
         return new APPResponse();
     }
 
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON})
+    @Produces({ MediaType.APPLICATION_JSON})
+    public APPResponse createcast(@Context HttpHeaders headers,
+                                  Object obj) {
+        JSONObject json = null;
+        try {
+            Authorization.checkAdmin(headers);
+            json = new JSONObject(ow.writeValueAsString(obj));
+            if (!json.has("showId"))
+                throw new APPBadRequestException(55, "missing showId");
+            if (!json.has("castName"))
+                throw new APPBadRequestException(55, "missing castName");
+            if (!json.has("roles"))
+                throw new APPBadRequestException(55, "missing roles");
+            if (!json.has("castPhoto"))
+                throw new APPBadRequestException(55, "missing castPhoto");
+
+            Document doc = new Document("showId", json.getString("showId"))
+                    .append("castName", json.getString("castName"))
+                    .append("roles", json.getString("roles"))
+                    .append("castPhoto", json.getString("castPhoto"));
+
+            collection.insertOne(doc);
+            return new APPResponse(obj);
+        } catch (JSONException e) {
+            throw new APPBadRequestException(33, e.getMessage());
+        } catch (JsonProcessingException e) {
+            throw new APPBadRequestException(33, e.getMessage());
+        } catch(APPUnauthorizedException e){
+            throw new APPUnauthorizedException(70,"Not authorized.");
+        }  catch(Exception e) {
+            throw new APPInternalServerException(99,"Something happens!");
+        }
+    }
 
     @DELETE
     @Path("{id}")
