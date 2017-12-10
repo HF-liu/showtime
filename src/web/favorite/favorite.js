@@ -8,6 +8,9 @@ $(function() {
 
     window.onload= onLoadFunction();
     $("#favRow").hide();
+    if(isAdmin == "false"){
+        $(".justAdminall").hide();
+    }
     function onLoadFunction(){
         //alert("Under Construction");
     }
@@ -48,6 +51,9 @@ $(function() {
 
                     $("#"+item.favId).prop("class","cloned");
                     $("#"+item.favId).show();
+                    if(isAdmin == "false"){
+                        $(".justAdmin").hide();
+                    }
                 });
 
             })
@@ -92,6 +98,9 @@ $(function() {
 
                     $("#"+item.favId).prop("class","cloned");
                     $("#"+item.favId).show();
+                    // if(isAdmin == "false"){
+                    //     $(".justAdmin").hide();
+                    // }
                 });
 
             })
