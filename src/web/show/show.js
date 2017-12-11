@@ -197,6 +197,7 @@ $(function() {
 
         function createCallback(j,showIdList){
             return function(){
+                window.localStorage.setItem("showId", showIdList[j]);
                 insertTable(showIdList[j]);
                 insertRevTable(showIdList[j]);
             }
@@ -241,6 +242,57 @@ $(function() {
                     alert("Failed to edit!");
                 })
         });
+    });
+
+    $("#followButton").click(function () {
+        var userId = window.localStorage.getItem("userId");
+        var showId = window.localStorage.getItem("showId");
+        data = {showId: showId};
+        jQuery.ajax({
+            url: "/api/users/" + userId + "/favs/",
+            type: "POST",
+            data: JSON.stringify(data),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", token);
+            }
+        })
+            .done(function (data) {
+                location.reload();
+            })
+            .fail(function (data) {
+                alert("Failed to add follows!");
+            })
+    });
+
+    $("#submitButton").click(function () {
+        var userId = window.localStorage.getItem("userId");
+        var showId = window.localStorage.getItem("showId");
+        var date = new Date();
+        data = {
+            userId: userId,
+            createDate: date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate()
+            + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds(),
+            reviewTopic: $("#title").val(),
+            reviewContent: $("#comment").val()
+        };
+        jQuery.ajax({
+            url: "/api/shows/" + showId + "/reviews/",
+            type: "POST",
+            data: JSON.stringify(data),
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", token);
+            }
+        })
+            .done(function (data) {
+                location.reload();
+            })
+            .fail(function (data) {
+                alert("Failed to add reviews!");
+            })
     });
 
 });

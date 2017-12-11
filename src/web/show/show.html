@@ -94,9 +94,13 @@
 
          -->
     </ul>
-<hr>
+<hr/>
     <div class="showDetail">
-        <h2>Show Details</h2>
+        <div>
+            <h2 style="display: inline">Show Details</h2>
+            <button style="float: right;margin-right: 16rem" class="btn btn-primary" id="followButton">Follow</button>
+        </div>
+
         <table border="1" width="600" id="resourceTable" class="table table-responsive table-bordered" align="center">
         <tr align="center">
             <td>channelId</td>
@@ -114,9 +118,11 @@
         </tr>
         </table>
     </div>
-<hr>
-  <div class="showReviews">
-    <h2>Show Reviews</h2>
+<hr/>
+    <div class="showReviews">
+      <div>
+          <h2 style="display: inline">Show Reviews</h2>
+      </div>
     <table border="1" width="300" class="table table-responsive table-bordered" id="reviewTable" >
         <tr align="center">
             <!--<td>Arthur</td>-->
@@ -131,8 +137,17 @@
             <td id="Operations" align="center"></td>
         </tr>
     </table>
+<hr/>
+    <h2 style="display: inline">Add Your Review</h2>
+    <div class="form-group">
+        <label for="title">Title:</label>
+        <input type="text" class="form-control" id="title">
+        <label for="comment">Comment:</label>
+        <textarea class="form-control" rows="5" id="comment"></textarea>
+        <br/>
+        <button class="btn btn-primary" id="submitButton">Submit</button>
+    </div>
 
-  </div>
 </div>
 
 <div class="modal fade" id="editReview" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
