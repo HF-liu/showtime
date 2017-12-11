@@ -10,6 +10,7 @@ $(function() {
     // $("#resourceRow").hide();
 
     $("#signin").click(function (e) {
+        $("#loading").show();
         e.preventDefault();
         jQuery.ajax ({
             url:  "/api/sessions",

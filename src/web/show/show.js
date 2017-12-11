@@ -5,6 +5,8 @@ $(function() {
     $('#resourceTable').hide();
     $('#reviewTable').hide();
     $("#reviewRow").hide();
+    $("#commentPart").hide();
+    $("#followButton").hide();
     //$('#resourceTable').show();
     if(isAdmin == "false"){
         $(".justAdminall").hide();
@@ -53,6 +55,8 @@ $(function() {
 
         function insertTable(showId){
             $('#resourceTable').show();
+            $('#commentPart').show();
+            $('#followButton').show();
 
             jQuery.ajax({
 
@@ -277,6 +281,16 @@ $(function() {
             reviewTopic: $("#title").val(),
             reviewContent: $("#comment").val()
         };
+        if (data.reviewContent == null || data.reviewTopic == null) {
+            alert("Please fill in the blanks.");
+            return;
+        }
+        else if (data.reviewTopic.trim() == "" || data.reviewContent.trim() == "") {
+            alert("Please fll in the blanks.");
+            return;
+        }
+
+
         jQuery.ajax({
             url: "/api/shows/" + showId + "/reviews/",
             type: "POST",
